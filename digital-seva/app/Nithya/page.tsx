@@ -8,11 +8,11 @@ export default function NithyaPage() {
   const router = useRouter();
 
   return (
-    <div className="container mx-auto px-6 py-4">
+    <div className="min-h-screen">
       <Navbar />
 
       {/* Back Button */}
-      <div className="mt-6 mb-10">
+      <div className="container mx-auto px-4 mt-4">
         <button
           onClick={() => router.push("/")}
           className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition duration-300"

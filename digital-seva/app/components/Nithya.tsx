@@ -128,7 +128,7 @@ export function Nithya() {
   return (
     <div className="flex flex-col h-screen bg-gray-100">
       {/* Header */}
-      <div className="bg-primary p-4 text-white">
+      <div className="bg-blue-600 p-4 text-white">
         <h1 className="text-xl font-bold">Nithya - AI Assistant</h1>
         {selectedLanguage && (
           <div className="text-sm">
