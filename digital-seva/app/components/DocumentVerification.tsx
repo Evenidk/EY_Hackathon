@@ -11,8 +11,8 @@ import {
   CardHeader,
   CardTitle 
 } from "@/components/ui/card";
+import { toast } from "@/hooks/use-toast";
 
-// Simplified VerificationResult interface
 interface VerificationResult {
   isValid: boolean;
   confidenceScore: number;
@@ -21,10 +21,13 @@ interface VerificationResult {
 }
 
 interface Document {
+  _id?: string;
   type: string;
   file: File | null;
   status: 'pending' | 'verifying' | 'verified' | 'failed';
   result?: VerificationResult;
+  isStored?: boolean;
+  uploadProgress?: number;
 }
 
 const DOCUMENT_TYPES = [
@@ -43,8 +46,9 @@ const DOCUMENT_TYPES = [
   'Educational Certificates',
 ];
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 export function DocumentVerification() {
-  // Add mounted state to handle hydration
   const [isMounted, setIsMounted] = useState(false);
   const [documents, setDocuments] = useState<Document[]>(
     DOCUMENT_TYPES.map(type => ({
@@ -53,63 +57,154 @@ export function DocumentVerification() {
       status: 'pending'
     }))
   );
+  const [authToken, setAuthToken] = useState<string | null>(null);
 
-  // Handle hydration
   useEffect(() => {
     setIsMounted(true);
+    const token = localStorage.getItem('token');
+    setAuthToken(token);
+    
+    if (token) {
+      fetchUserDocuments(token);
+    }
   }, []);
+
+  const fetchUserDocuments = async (token: string) => {
+    try {
+      const response = await fetch('http://localhost:3000/api/documents/my-documents', {
+        headers: {
+          'x-auth-token': token
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch documents');
+      }
+
+      const existingDocs = await response.json();
+      
+      setDocuments(prev => prev.map(doc => {
+        const existingDoc = existingDocs.find((ed: any) => ed.documentType === doc.type);
+        return existingDoc ? {
+          ...doc,
+          _id: existingDoc._id,
+          status: existingDoc.isVerified ? 'verified' : 'failed',
+          isStored: true,
+          result: {
+            isValid: existingDoc.isVerified,
+            confidenceScore: existingDoc.verificationDetails?.confidenceScore || 0,
+            documentType: existingDoc.documentType,
+            errors: existingDoc.verificationDetails?.errors || []
+          }
+        } : doc;
+      }));
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch your documents",
+        variant: "destructive"
+      });
+    }
+  };
 
   const handleFileUpload = async (type: string, file: File) => {
     try {
-      if (file.size > 10 * 1024 * 1024) {
+      if (file.size > MAX_FILE_SIZE) {
         throw new Error('File size should be less than 10MB');
       }
-  
+
       setDocuments(prev => prev.map(doc => 
         doc.type === type 
-          ? { ...doc, file, status: 'verifying' }
+          ? { ...doc, file, status: 'verifying', uploadProgress: 0 }
           : doc
       ));
-  
+
+      // First verify the document
       const formData = new FormData();
       formData.append('file', file);
       formData.append('documentType', type);
-  
-      const response = await fetch('http://localhost:5000/verify', {
+
+      const verifyResponse = await fetch('http://localhost:5000/verify', {
         method: 'POST',
         body: formData,
       });
-  
-      const result = await response.json();
-  
-      if (!response.ok) {
-        throw new Error(result.error || `Server error: ${response.status}`);
+
+      if (!verifyResponse.ok) {
+        throw new Error('Verification failed');
       }
-  
-      // Transform the result to match our simplified interface
+
+      const verificationResult = await verifyResponse.json();
       const transformedResult: VerificationResult = {
-        isValid: result.isValid,
-        confidenceScore: result.confidenceScore || 0,
-        documentType: result.documentType,
-        errors: result.errors || []
+        isValid: verificationResult.isValid,
+        confidenceScore: verificationResult.confidenceScore || 0,
+        documentType: verificationResult.documentType,
+        errors: verificationResult.errors || []
       };
-  
-      setDocuments(prev => prev.map(doc => 
-        doc.type === type 
-          ? { 
-              ...doc, 
-              status: transformedResult.isValid ? 'verified' : 'failed',
-              result: transformedResult
-            }
-          : doc
-      ));
-    } catch (error: unknown) {
-      console.error('Verification error:', error);
+
+      // If verification successful, store the document
+      if (transformedResult.isValid && authToken) {
+        const uploadFormData = new FormData();
+        uploadFormData.append('document', file);
+        uploadFormData.append('documentType', type);
+        uploadFormData.append('verificationResult', JSON.stringify(transformedResult));
+
+        const uploadResponse = await fetch('http://localhost:3000/api/documents/upload', {
+          method: 'POST',
+          headers: {
+            'x-auth-token': authToken
+          },
+          body: uploadFormData
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error('Failed to store document');
+        }
+
+        const storedDoc = await uploadResponse.json();
+
+        setDocuments(prev => prev.map(doc => 
+          doc.type === type 
+            ? { 
+                ...doc, 
+                _id: storedDoc._id,
+                status: 'verified',
+                result: transformedResult,
+                isStored: true,
+                uploadProgress: 100
+              }
+            : doc
+        ));
+
+        toast({
+          title: "Success",
+          description: "Document verified and stored successfully",
+          variant: "default"
+        });
+      } else {
+        setDocuments(prev => prev.map(doc => 
+          doc.type === type 
+            ? { 
+                ...doc, 
+                status: 'failed',
+                result: transformedResult,
+                uploadProgress: undefined
+              }
+            : doc
+        ));
+
+        if (!transformedResult.isValid) {
+          toast({
+            title: "Verification Failed",
+            description: transformedResult.errors?.[0] || "Document verification failed",
+            variant: "destructive"
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : 'Unknown error occurred';
-  
       setDocuments(prev => prev.map(doc => 
         doc.type === type 
           ? { 
@@ -120,17 +215,58 @@ export function DocumentVerification() {
                 confidenceScore: 0,
                 documentType: type,
                 errors: [errorMessage]
-              }
+              },
+              uploadProgress: undefined
             }
           : doc
       ));
+
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive"
+      });
     }
   };
 
-  // Don't render until client-side hydration is complete
-  if (!isMounted) {
-    return null;
-  }
+  const handleDeleteDocument = async (docId: string, type: string) => {
+    if (!authToken || !docId) return;
+
+    try {
+      const response = await fetch(`http://localhost:3000/api/documents/${docId}`, {
+        method: 'DELETE',
+        headers: {
+          'x-auth-token': authToken
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete document');
+      }
+
+      setDocuments(prev => prev.map(doc => 
+        doc.type === type 
+          ? { type, file: null, status: 'pending', isStored: false }
+          : doc
+      ));
+
+      toast({
+        title: "Success",
+        description: "Document deleted successfully",
+        variant: "default"
+      });
+
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete document",
+        variant: "destructive"
+      });
+    }
+  };
+
+  if (!isMounted) return null;
   
   return (
     <div className="container mx-auto py-8">
@@ -156,7 +292,11 @@ export function DocumentVerification() {
                     const file = e.target.files?.[0];
                     if (file) {
                       if (file.type !== 'application/pdf') {
-                        alert('Please upload only PDF files');
+                        toast({
+                          title: "Error",
+                          description: "Please upload only PDF files",
+                          variant: "destructive"
+                        });
                         e.target.value = '';
                         return;
                       }
@@ -166,22 +306,36 @@ export function DocumentVerification() {
                   className="hidden"
                   id={`file-${doc.type}`}
                 />
-                <Button
-                  onClick={() => document.getElementById(`file-${doc.type}`)?.click()}
-                  disabled={doc.status === 'verifying'}
-                  variant={doc.status === 'verified' ? 'outline' : 'default'}
-                >
-                  {doc.file ? 'Replace Document' : 'Upload Document'}
-                </Button>
+                <div className="flex space-x-2">
+                  <Button
+                    onClick={() => document.getElementById(`file-${doc.type}`)?.click()}
+                    disabled={doc.status === 'verifying'}
+                    variant={doc.status === 'verified' ? 'outline' : 'default'}
+                  >
+                    {doc.file ? 'Replace Document' : 'Upload Document'}
+                  </Button>
+
+                  {doc.isStored && (
+                    <Button
+                      variant="destructive"
+                      onClick={() => doc._id && handleDeleteDocument(doc._id, doc.type)}
+                    >
+                      Delete
+                    </Button>
+                  )}
+                </div>
 
                 {doc.status === 'verifying' && (
                   <div className="space-y-2">
-                    <Progress value={45} className="w-full" />
+                    <Progress 
+                      value={doc.uploadProgress || 45} 
+                      className="w-full"
+                    />
                     <p className="text-sm text-gray-500">Processing document...</p>
                   </div>
                 )}
 
-                {doc.result && isMounted && (
+                {doc.result && (
                   <div className="text-sm space-y-2">
                     <p className={`font-medium ${doc.result.isValid ? 'text-green-600' : 'text-red-600'}`}>
                       {doc.result.isValid ? 'Verification Successful' : 'Verification Failed'}
