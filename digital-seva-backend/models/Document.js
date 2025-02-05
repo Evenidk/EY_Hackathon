@@ -16,7 +16,17 @@ const DocumentSchema = new mongoose.Schema({
             'Caste Certificate',
             'Ration Card',
             'Voter ID',
-            'Driving License'
+            'Driving License',
+            'Income Certificate',
+            'Disability Certificate',
+            'BPL Certificate',
+            'Domicile Certificate',
+            'Birth Certificate',
+            'Marriage Certificate',
+            'Bank Passbook',
+            'Employment Certificate',
+            'Educational Certificates',
+            'Property Documents'
         ]
     },
     filePath: {

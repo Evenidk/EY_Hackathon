@@ -63,10 +63,10 @@ const CitizenServices = () => {
       color: "bg-blue-500",
     },
     {
-      title: t("trackApplications"),
-      description: t("trackApplicationsDesc"),
+      title: t("Document Management System"),
+      description: t("AI-driven document verification & management"),
       icon: <FileText className="h-7 w-7" />,
-      href: "/track-applications",
+      href: "/Document_Management_System",
       color: "bg-green-500",
     },
     {
