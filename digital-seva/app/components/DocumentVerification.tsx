@@ -41,7 +41,6 @@ const DOCUMENT_TYPES = [
   'Bank Passbook',
   'Employment Certificate',
   'Educational Certificates',
-  'Property Documents'
 ];
 
 export function DocumentVerification() {
