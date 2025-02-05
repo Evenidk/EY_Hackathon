@@ -312,43 +312,149 @@ class PANCardValidator(BaseDocumentValidator):
         return info
 
 class VoterIDValidator(BaseDocumentValidator):
-    def validate(self, text: str) -> Dict[str, Any]:
-        self.extracted_text = text.upper()
-        self.validation_errors = []
-        self.matches = {}
-        
-        required_patterns = {
-            "Electoral Photo ID": r"""
-                (?:
-                    ELECTORAL\s+PHOTO\s+ID|
-                    ELECTION\s+COMMISSION|
-                    VOTER\s+ID|
-                    मतदाता\s+फोटो
-                )
-            """,
-            "EPIC Number": r"""
-                (?:
-                    [A-Z]{3}\d{7}|
-                    EPIC\s+NO[.:]\s*[A-Z]{3}\d{7}
-                )
-            """,
-            "Election Commission": r"""
-                (?:
-                    ELECTION\s+COMMISSION\s+OF\s+INDIA|
-                    भारत\s+निर्वाचन\s+आयोग
-                )
-            """
+    def __init__(self):
+        super().__init__()
+        self.key_identifiers = {
+            'document_identifiers': [
+                r'ELECTION\s*COMMISSION\s*OF\s*INDIA',
+                r'ELECTOR\s*PHOTO\s*IDENTITY\s*CARD',
+                r'EPIC\s*NO',
+                r'VOTER\s*ID',
+                r'मतदाता\s*पहचान\s*पत्र',
+                r'भारत\s*निर्वाचन\s*आयोग',
+                r'IDENTITY\s*CARD'
+            ],
+            'personal_info': [
+                r'NAME\s*[:]\s*([A-Z\s]+)',
+                r'FATHER[\'S]*\s*NAME\s*[:]\s*([A-Z\s]+)',
+                r'SEX\s*[:]\s*([A-Z]+)',
+                r'DATE\s*OF\s*BIRTH',
+                r'AGE\s*[:]\s*(\d+)',
+                r'ADDRESS'
+            ],
+            'epic_number': [
+                r'[A-Z]{3}\d{7}',  # Standard EPIC format
+                r'[A-Z]{2,3}\/\d{2}\/\d{3}\/\d{6}',  # Alternative format
+                r'[A-Z]{2,3}\/\d{6,8}',  # Another variation
+                r'\b[A-Z0-9]{10}\b',  # Generic 10 character format
+                r'EPIC\s*NO[.:]\s*([A-Z0-9\/]{8,})'  # EPIC with prefix
+            ]
         }
-        
-        self.validate_text_presence(required_patterns)
-        self.confidence_score = self.calculate_confidence(len(required_patterns))
-        
-        # Extract specific details
-        epic_match = re.search(r'[A-Z]{3}\d{7}', self.extracted_text)
-        if epic_match:
-            self.matches['EPIC_Number'] = epic_match.group()
+
+    def validate(self, text: str) -> Dict[str, Any]:
+        """Enhanced validation with better pattern matching"""
+        try:
+            self.extracted_text = text.upper()
+            self.matches = {}
+            self.validation_errors = []
             
-        return self._generate_response("Voter ID")
+            logger.debug(f"Validating Voter ID text: {self.extracted_text}")
+            
+            # Initialize scoring
+            matches_found = {
+                'document_identifiers': 0,
+                'personal_info': 0,
+                'epic_number': 0
+            }
+
+            # Check document identifiers
+            for pattern in self.key_identifiers['document_identifiers']:
+                if re.search(pattern, self.extracted_text):
+                    matches_found['document_identifiers'] += 0.25
+                    logger.debug(f"Found document identifier: {pattern}")
+
+            # Check personal information
+            for pattern in self.key_identifiers['personal_info']:
+                if re.search(pattern, self.extracted_text):
+                    matches_found['personal_info'] += 0.2
+                    logger.debug(f"Found personal info: {pattern}")
+
+            # Check EPIC number with multiple formats
+            for pattern in self.key_identifiers['epic_number']:
+                match = re.search(pattern, self.extracted_text)
+                if match:
+                    epic_number = match.group(1) if 'EPIC' in pattern else match.group()
+                    self.matches['epic_number'] = epic_number
+                    matches_found['epic_number'] = 1
+                    logger.debug(f"Found EPIC number: {epic_number}")
+                    break
+
+            # Cap scores at 1.0
+            matches_found = {k: min(v, 1.0) for k, v in matches_found.items()}
+
+            # Calculate weighted confidence score
+            weights = {
+                'document_identifiers': 0.4,
+                'personal_info': 0.3,
+                'epic_number': 0.3
+            }
+            self.confidence_score = sum(matches_found[k] * weights[k] for k in matches_found)
+
+            # Extract additional information
+            additional_info = self._extract_additional_info()
+
+            # Determine validity with lower threshold
+            is_valid = (self.confidence_score >= 0.4)  # Lowered threshold
+
+            result = {
+                'documentType': 'Voter ID',
+                'isValid': is_valid,
+                'confidenceScore': self.confidence_score,
+                'matchedIdentifiers': matches_found,
+                'extractedData': {
+                    **self.matches,
+                    **additional_info
+                },
+                'validationDetails': {
+                    'scores': matches_found,
+                    'requiredMinimum': 0.4,
+                    'hasDocumentIdentifiers': matches_found['document_identifiers'] > 0,
+                    'hasPersonalInfo': matches_found['personal_info'] > 0,
+                    'hasEPICNumber': matches_found['epic_number'] > 0
+                }
+            }
+
+            logger.debug(f"Validation result: {result}")
+            return result
+
+        except Exception as e:
+            logger.error(f"Error in Voter ID validation: {str(e)}")
+            return {
+                'documentType': 'Voter ID',
+                'isValid': False,
+                'confidenceScore': 0.0,
+                'error': str(e)
+            }
+
+    def _extract_additional_info(self) -> Dict[str, str]:
+        """Extract additional information from the Voter ID"""
+        info = {}
+        
+        # Extract name
+        name_match = re.search(r"ELECTOR['S]*\s*NAME\s*[:]\s*([A-Z\s]+)", self.extracted_text)
+        if name_match:
+            info['name'] = name_match.group(1).strip()
+
+        # Extract father's name
+        father_match = re.search(r"FATHER['S]*\s*NAME\s*[:]\s*([A-Z\s]+)", self.extracted_text)
+        if father_match:
+            info['fatherName'] = father_match.group(1).strip()
+
+        # Extract sex/gender
+        sex_match = re.search(r"SEX\s*[:]\s*([A-Z]+)", self.extracted_text)
+        if sex_match:
+            info['gender'] = sex_match.group(1).strip()
+
+        # Extract DOB/Age
+        dob_match = re.search(r"DATE\s*OF\s*BIRTH\s*[:]\s*(\d{2}[/-]\d{2}[/-]\d{4})", self.extracted_text)
+        if dob_match:
+            info['dateOfBirth'] = dob_match.group(1)
+        else:
+            age_match = re.search(r"AGE\s*[:]\s*(\d+)", self.extracted_text)
+            if age_match:
+                info['age'] = age_match.group(1)
+
+        return info
 
 class DrivingLicenseValidator(BaseDocumentValidator):
     def __init__(self):
@@ -516,43 +622,154 @@ class DrivingLicenseValidator(BaseDocumentValidator):
                 confidence >= 0.4)
 
 class RationCardValidator(BaseDocumentValidator):
-    def validate(self, text: str) -> Dict[str, Any]:
-        self.extracted_text = text.upper()
-        self.validation_errors = []
-        self.matches = {}
-        
-        required_patterns = {
-            "Ration Card Number": r"""
-                (?:
-                    [A-Z]{2,3}[-/]\d{6,10}|
-                    CARD\s*NO[.:]\s*[A-Z0-9/-]+
-                )
-            """,
-            "Category": r"""
-                (?:
-                    APL|BPL|AAY|PHH|
-                    PRIORITY\s+HOUSEHOLD|
-                    ANTYODAYA
-                )
-            """,
-            "Department": r"""
-                (?:
-                    DEPARTMENT\s+OF\s+FOOD|
-                    FOOD\s+AND\s+CIVIL\s+SUPPLIES|
-                    खाद्य\s+विभाग
-                )
-            """
+    def __init__(self):
+        super().__init__()
+        self.key_identifiers = {
+            'document_identifiers': [
+                r'RATION\s*CARD',
+                r'राशन\s*कार्ड',
+                r'PUBLIC\s*DISTRIBUTION\s*SYSTEM',
+                r'FOOD\s*AND\s*CIVIL\s*SUPPLIES',
+                r'खाद्य\s*एवं\s*नागरिक\s*आपूर्ति'
+            ],
+            'card_numbers': [
+                r'(?:CARD|NO|NUMBER)[.:]\s*([A-Z0-9/-]+)',
+                r'\b\d{11}\b',  # 11-digit format
+                r'[A-Z]{2,3}[-/]\d{6,10}',
+                r'C\.?R\.?O\.?\s*\([A-Z]\)',  # CRO format
+                r'DISTRICT\s*(\d+)',  # District number format
+            ],
+            'categories': [
+                r'\b(?:APL|BPL|AAY|PHH)\b',
+                r'ABOVE\s*POVERTY\s*LINE',
+                r'BELOW\s*POVERTY\s*LINE',
+                r'ANTYODAYA',
+                r'PRIORITY\s*HOUSEHOLD'
+            ]
         }
-        
-        self.validate_text_presence(required_patterns)
-        
-        # Extract family members count
-        family_match = re.search(r'FAMILY\s+MEMBERS[:\s]+(\d+)', self.extracted_text)
-        if family_match:
-            self.matches['FamilyMembers'] = family_match.group(1)
+
+    def validate(self, text: str) -> Dict[str, Any]:
+        """Enhanced validation with better pattern matching"""
+        try:
+            self.extracted_text = text.upper()
+            self.matches = {}
+            self.validation_errors = []
             
-        self.confidence_score = self.calculate_confidence(len(required_patterns))
-        return self._generate_response("Ration Card")
+            logger.debug(f"Validating Ration Card text: {self.extracted_text}")
+            
+            # Initialize scoring
+            matches_found = {
+                'document_identifiers': 0,
+                'card_number': 0,
+                'category': 0,
+                'additional_info': 0
+            }
+
+            # Check document identifiers
+            for pattern in self.key_identifiers['document_identifiers']:
+                if re.search(pattern, self.extracted_text):
+                    matches_found['document_identifiers'] += 0.25
+                    logger.debug(f"Found document identifier: {pattern}")
+
+            # Check card numbers
+            for pattern in self.key_identifiers['card_numbers']:
+                match = re.search(pattern, self.extracted_text)
+                if match:
+                    card_number = match.group(1) if '(' in pattern else match.group()
+                    self.matches['card_number'] = card_number
+                    matches_found['card_number'] = 1
+                    logger.debug(f"Found card number: {card_number}")
+                    break
+
+            # Check categories
+            for pattern in self.key_identifiers['categories']:
+                match = re.search(pattern, self.extracted_text)
+                if match:
+                    self.matches['category'] = match.group()
+                    matches_found['category'] = 1
+                    logger.debug(f"Found category: {match.group()}")
+                    break
+
+            # Extract additional information
+            additional_info = self._extract_additional_info()
+            if additional_info:
+                matches_found['additional_info'] = len(additional_info) * 0.2
+                self.matches.update(additional_info)
+
+            # Cap scores at 1.0
+            matches_found = {k: min(v, 1.0) for k, v in matches_found.items()}
+
+            # Calculate weighted confidence score
+            weights = {
+                'document_identifiers': 0.3,
+                'card_number': 0.3,
+                'category': 0.2,
+                'additional_info': 0.2
+            }
+            self.confidence_score = sum(matches_found[k] * weights[k] for k in matches_found)
+
+            # Determine validity with lower threshold
+            is_valid = (self.confidence_score >= 0.3)  # Lowered threshold
+
+            result = {
+                'documentType': 'Ration Card',
+                'isValid': is_valid,
+                'confidenceScore': self.confidence_score,
+                'matchedIdentifiers': matches_found,
+                'extractedData': self.matches,
+                'validationDetails': {
+                    'scores': matches_found,
+                    'requiredMinimum': 0.3,
+                    'hasDocumentIdentifiers': matches_found['document_identifiers'] > 0,
+                    'hasCardNumber': matches_found['card_number'] > 0,
+                    'hasCategory': matches_found['category'] > 0,
+                    'extractedText': self.extracted_text
+                }
+            }
+
+            logger.debug(f"Validation result: {result}")
+            return result
+
+        except Exception as e:
+            logger.error(f"Error in Ration Card validation: {str(e)}")
+            return {
+                'documentType': 'Ration Card',
+                'isValid': False,
+                'confidenceScore': 0.0,
+                'error': str(e)
+            }
+
+    def _extract_additional_info(self) -> Dict[str, str]:
+        """Extract additional information from the Ration Card"""
+        info = {}
+        
+        # Extract address
+        address_match = re.search(r'ADDRESS\s*[:.]\s*([A-Z0-9\s,/-]+?)(?=\b(?:DISTRICT|PIN|DATE|UNITS)\b|$)', 
+                                self.extracted_text)
+        if address_match:
+            info['address'] = address_match.group(1).strip()
+
+        # Extract district
+        district_match = re.search(r'DISTRICT\s*[:.]\s*([A-Z\s]+)', self.extracted_text)
+        if district_match:
+            info['district'] = district_match.group(1).strip()
+
+        # Extract units/family members
+        units_match = re.search(r'UNITS\s*(?:ALLOTED|ALLOCATED)\s*[:.]\s*(\d+)', self.extracted_text)
+        if units_match:
+            info['units_allocated'] = units_match.group(1)
+
+        # Extract income
+        income_match = re.search(r'INCOME\s*(?:OF\s*FAMILY)?\s*[:.]\s*(?:RS\.?\s*)?(\d+)', self.extracted_text)
+        if income_match:
+            info['family_income'] = income_match.group(1)
+
+        # Extract issue date
+        date_match = re.search(r'DATE\s*OF\s*ISSUE\s*[:.]\s*(\d{1,2}[-/]\d{1,2}[-/]\d{2,4})', self.extracted_text)
+        if date_match:
+            info['issue_date'] = date_match.group(1)
+
+        return info
 
 class CasteCertificateValidator(BaseDocumentValidator):
     def validate(self, text: str) -> Dict[str, Any]:
@@ -728,44 +945,154 @@ class IncomeCertificateValidator(BaseDocumentValidator):
  
 
 class DisabilityCertificateValidator(BaseDocumentValidator):
-    def validate(self, text: str) -> Dict[str, Any]:
-        self.extracted_text = text.upper()
-        self.validation_errors = []
-        self.matches = {}
-        
-        required_patterns = {
-            "Certificate Title": r"""
-                (?:
-                    DISABILITY\s+CERTIFICATE|
-                    DIVYANG\s+CERTIFICATE|
-                    दिव्यांगता\s+प्रमाण\s+पत्र
-                )
-            """,
-            "Disability Type": r"""
-                (?:
-                    LOCOMOTOR|VISUAL|HEARING|
-                    MENTAL|MULTIPLE|
-                    PHYSICAL\s+DISABILITY
-                )
-            """,
-            "Medical Authority": r"""
-                (?:
-                    MEDICAL\s+BOARD|
-                    MEDICAL\s+SUPERINTENDENT|
-                    CIVIL\s+SURGEON
-                )
-            """
+    def __init__(self):
+        super().__init__()
+        self.key_identifiers = {
+            'certificate_identifiers': [
+                r'DISABILITY\s*CERTIFICATE',
+                r'DIVYANG\s*CERTIFICATE',
+                r'दिव्यांगता\s*प्रमाण\s*पत्र',
+                r'DEPARTMENT\s*OF\s*EMPOWERMENT\s*OF\s*PERSONS\s*WITH\s*DISABILITIES'
+            ],
+            'disability_types': [
+                r'LOCOMOTOR\s*DISABILITY',
+                r'VISUAL\s*IMPAIRMENT',
+                r'HEARING\s*IMPAIRMENT',
+                r'MENTAL\s*(?:DISABILITY|ILLNESS)',
+                r'MULTIPLE\s*DISABILITIES',
+                r'PHYSICAL\s*DISABILITY',
+                r'PARAPARESIS',
+                r'LUMBER\s*DISC'
+            ],
+            'authorities': [
+                r'MEDICAL\s*(?:BOARD|AUTHORITY)',
+                r'MEDICAL\s*SUPERINTENDENT',
+                r'CIVIL\s*SURGEON',
+                r'NOTIFIED\s*MEDICAL\s*AUTHORITY',
+                r'ISSUING\s*MEDICAL\s*AUTHORITY'
+            ],
+            'certificate_numbers': [
+                r'CERTIFICATE\s*NO\.?[:]?\s*([A-Z0-9/-]+)',
+                r'\b[A-Z]{2}\d{16,}\b',  # Format like MH0420619680200284
+                r'REG(?:ISTRATION)?\s*NO\.?[:]?\s*([A-Z0-9/-]+)'
+            ]
         }
-        
-        self.validate_text_presence(required_patterns)
-        
-        # Extract disability percentage
-        percent_match = re.search(r'(\d{1,3})%?\s*(?:PERMANENT\s+)?DISABILITY', self.extracted_text)
-        if percent_match:
-            self.matches['DisabilityPercentage'] = f"{percent_match.group(1)}%"
+
+    def validate(self, text: str) -> Dict[str, Any]:
+        try:
+            self.extracted_text = text.upper()
+            self.matches = {}
+            self.validation_errors = []
             
-        self.confidence_score = self.calculate_confidence(len(required_patterns))
-        return self._generate_response("Disability Certificate")
+            logger.debug(f"Validating Disability Certificate text: {self.extracted_text}")
+            
+            # Initialize scoring
+            matches_found = {
+                'certificate_identifiers': 0,
+                'disability_type': 0,
+                'authority': 0,
+                'additional_info': 0
+            }
+
+            # Check certificate identifiers
+            for pattern in self.key_identifiers['certificate_identifiers']:
+                if re.search(pattern, self.extracted_text):
+                    matches_found['certificate_identifiers'] += 0.25
+                    logger.debug(f"Found certificate identifier: {pattern}")
+
+            # Check disability types
+            for pattern in self.key_identifiers['disability_types']:
+                match = re.search(pattern, self.extracted_text)
+                if match:
+                    self.matches['disability_type'] = match.group()
+                    matches_found['disability_type'] = 1
+                    logger.debug(f"Found disability type: {match.group()}")
+                    break
+
+            # Check medical authorities
+            for pattern in self.key_identifiers['authorities']:
+                if re.search(pattern, self.extracted_text):
+                    matches_found['authority'] = 1
+                    logger.debug(f"Found medical authority: {pattern}")
+                    break
+
+            # Extract additional information
+            additional_info = self._extract_additional_info()
+            if additional_info:
+                matches_found['additional_info'] = len(additional_info) * 0.2
+                self.matches.update(additional_info)
+
+            # Calculate weighted confidence score
+            weights = {
+                'certificate_identifiers': 0.3,
+                'disability_type': 0.3,
+                'authority': 0.2,
+                'additional_info': 0.2
+            }
+            self.confidence_score = sum(matches_found[k] * weights[k] for k in matches_found)
+
+            # Determine validity with adjusted threshold
+            is_valid = (self.confidence_score >= 0.4)
+
+            result = {
+                'documentType': 'Disability Certificate',
+                'isValid': is_valid,
+                'confidenceScore': self.confidence_score,
+                'matchedIdentifiers': matches_found,
+                'extractedData': self.matches,
+                'validationDetails': {
+                    'scores': matches_found,
+                    'requiredMinimum': 0.4,
+                    'hasDocumentIdentifiers': matches_found['certificate_identifiers'] > 0,
+                    'hasDisabilityType': matches_found['disability_type'] > 0,
+                    'hasAuthority': matches_found['authority'] > 0
+                }
+            }
+
+            logger.debug(f"Validation result: {result}")
+            return result
+
+        except Exception as e:
+            logger.error(f"Error in Disability Certificate validation: {str(e)}")
+            return {
+                'documentType': 'Disability Certificate',
+                'isValid': False,
+                'confidenceScore': 0.0,
+                'error': str(e)
+            }
+
+    def _extract_additional_info(self) -> Dict[str, str]:
+        """Extract additional information from the Disability Certificate"""
+        info = {}
+        
+        # Extract certificate number
+        for pattern in self.key_identifiers['certificate_numbers']:
+            match = re.search(pattern, self.extracted_text)
+            if match:
+                info['certificate_number'] = match.group(1) if '(' in pattern else match.group()
+                break
+
+        # Extract disability percentage
+        percent_match = re.search(r'(\d{1,3})\s*%.*?(?:PERMANENT\s*)?DISABILITY', self.extracted_text)
+        if percent_match:
+            info['disability_percentage'] = f"{percent_match.group(1)}%"
+
+        # Extract personal details
+        name_match = re.search(r'EXAMINED\s+(?:SHRI|SMT|KUM)\.?\s+([A-Z\s]+?)(?:,|\s+(?:SON|DAUGHTER|WIFE))', self.extracted_text)
+        if name_match:
+            info['name'] = name_match.group(1).strip()
+
+        # Extract date of issue
+        date_match = re.search(r'DATE\s*:\s*(\d{1,2}[-/]\d{1,2}[-/]\d{2,4})', self.extracted_text)
+        if date_match:
+            info['issue_date'] = date_match.group(1)
+
+        # Extract address
+        address_match = re.search(r'RESIDENT\s+OF\s+([A-Z0-9\s,/-]+?)(?=\s+(?:WHOSE|PHOTO|DATE|DISTRICT|STATE))', self.extracted_text)
+        if address_match:
+            info['address'] = address_match.group(1).strip()
+
+        return info
         
 class BPLCertificateValidator(BaseDocumentValidator):
     def validate(self, text: str) -> Dict[str, Any]:
@@ -853,47 +1180,155 @@ class DomicileCertificateValidator(BaseDocumentValidator):
         return self._generate_response("Domicile Certificate")
 
 class BirthCertificateValidator(BaseDocumentValidator):
-    def validate(self, text: str) -> Dict[str, Any]:
-        self.extracted_text = text.upper()
-        self.validation_errors = []
-        self.matches = {}
-        
-        required_patterns = {
-            "Certificate Title": r"""
-                (?:
-                    BIRTH\s+CERTIFICATE|
-                    CERTIFICATE\s+OF\s+BIRTH|
-                    जन्म\s+प्रमाण\s+पत्र
-                )
-            """,
-            "Date of Birth": r"""
-                (?:
-                    DATE\s+OF\s+BIRTH[\s:]+[\d/\-]+|
-                    DOB[\s:]+[\d/\-]+|
-                    जन्म\s+तिथि[\s:]+[\d/\-]+
-                )
-            """,
-            "Registration": r"""
-                (?:
-                    REGISTRATION\s+NO[\s.:]+[\w/\-]+|
-                    CERT(?:IFICATE)?\s+NO[\s.:]+[\w/\-]+
-                )
-            """
+    def __init__(self):
+        super().__init__()
+        self.key_identifiers = {
+            'certificate_identifiers': [
+                r'BIRTH\s*CERTIFICATE',
+                r'CERTIFICATE\s*OF\s*BIRTH',
+                r'जन्म\s*प्रमाण\s*पत्र',
+                r'REGISTRATION\s*OF\s*BIRTH',
+                r'BIRTH\s*AND\s*DEATH\s*ACT'
+            ],
+            'registration_numbers': [
+                r'(?:REGISTRATION|REG|CERT(?:IFICATE)?)\s*(?:NO|NUMBER)[.:]\s*([A-Z0-9-]+)',
+                r'\b\d{4}[-]\d{10,}\b',  # Format like 0122-0701150862
+                r'[A-Z]+/\d+/\d+/\d+'
+            ],
+            'dates': [
+                r'(?:DATE\s*OF\s*BIRTH|DOB|BIRTH\s*DATE)[:\s]+(\d{1,2}[-/]\d{1,2}[-/]\d{2,4})',
+                r'(?:जन्म\s*तिथि)[:\s]+(\d{1,2}[-/]\d{1,2}[-/]\d{2,4})',
+                r'(\d{1,2}[-/]\d{1,2}[-/]\d{2,4})'
+            ],
+            'authorities': [
+                r'MUNICIPAL\s*CORPORATION',
+                r'GOVERNMENT\s*OF',
+                r'REGISTRAR',
+                r'CORPORATION\s*OF',
+                r'NAGAR\s*NIGAM'
+            ]
         }
-        
-        self.validate_text_presence(required_patterns)
-        
-        # Extract specific details
-        dob_match = re.search(r'(?:DATE\s+OF\s+BIRTH|DOB)[\s:]+(\d{1,2}[-/]\d{1,2}[-/]\d{4})', self.extracted_text)
-        if dob_match:
-            self.matches['DateOfBirth'] = dob_match.group(1)
+
+    def validate(self, text: str) -> Dict[str, Any]:
+        try:
+            self.extracted_text = text.upper()
+            self.matches = {}
+            self.validation_errors = []
             
-        place_match = re.search(r'PLACE\s+OF\s+BIRTH[\s:]+([A-Z\s,]+)', self.extracted_text)
+            logger.debug(f"Validating Birth Certificate text: {self.extracted_text}")
+            
+            # Initialize scoring
+            matches_found = {
+                'certificate_identifiers': 0,
+                'registration': 0,
+                'date_of_birth': 0,
+                'additional_info': 0
+            }
+
+            # Check certificate identifiers
+            for pattern in self.key_identifiers['certificate_identifiers']:
+                if re.search(pattern, self.extracted_text):
+                    matches_found['certificate_identifiers'] += 0.25
+                    logger.debug(f"Found certificate identifier: {pattern}")
+
+            # Check registration numbers
+            for pattern in self.key_identifiers['registration_numbers']:
+                match = re.search(pattern, self.extracted_text)
+                if match:
+                    reg_number = match.group(1) if '(' in pattern else match.group()
+                    self.matches['registration_number'] = reg_number
+                    matches_found['registration'] = 1
+                    logger.debug(f"Found registration number: {reg_number}")
+                    break
+
+            # Check dates
+            for pattern in self.key_identifiers['dates']:
+                match = re.search(pattern, self.extracted_text)
+                if match:
+                    self.matches['date_of_birth'] = match.group(1)
+                    matches_found['date_of_birth'] = 1
+                    logger.debug(f"Found date of birth: {match.group(1)}")
+                    break
+
+            # Extract additional information
+            additional_info = self._extract_additional_info()
+            if additional_info:
+                matches_found['additional_info'] = len(additional_info) * 0.2
+                self.matches.update(additional_info)
+
+            # Calculate weighted confidence score
+            weights = {
+                'certificate_identifiers': 0.3,
+                'registration': 0.3,
+                'date_of_birth': 0.2,
+                'additional_info': 0.2
+            }
+            self.confidence_score = sum(matches_found[k] * weights[k] for k in matches_found)
+
+            # Determine validity with adjusted threshold
+            is_valid = (self.confidence_score >= 0.4)
+
+            result = {
+                'documentType': 'Birth Certificate',
+                'isValid': is_valid,
+                'confidenceScore': self.confidence_score,
+                'matchedIdentifiers': matches_found,
+                'extractedData': self.matches,
+                'validationDetails': {
+                    'scores': matches_found,
+                    'requiredMinimum': 0.4,
+                    'hasDocumentIdentifiers': matches_found['certificate_identifiers'] > 0,
+                    'hasRegistration': matches_found['registration'] > 0,
+                    'hasDateOfBirth': matches_found['date_of_birth'] > 0
+                }
+            }
+
+            logger.debug(f"Validation result: {result}")
+            return result
+
+        except Exception as e:
+            logger.error(f"Error in Birth Certificate validation: {str(e)}")
+            return {
+                'documentType': 'Birth Certificate',
+                'isValid': False,
+                'confidenceScore': 0.0,
+                'error': str(e)
+            }
+
+    def _extract_additional_info(self) -> Dict[str, str]:
+        """Extract additional information from the Birth Certificate"""
+        info = {}
+        
+        # Extract name
+        name_match = re.search(r'NAME\s*[:.]\s*([A-Z\s]+?)(?=\s+(?:GENDER|SEX|DATE|FATHER|MOTHER))', self.extracted_text)
+        if name_match:
+            info['name'] = name_match.group(1).strip()
+
+        # Extract gender
+        gender_match = re.search(r'(?:GENDER|SEX)\s*[:.]\s*([A-Z]+)', self.extracted_text)
+        if gender_match:
+            info['gender'] = gender_match.group(1).strip()
+
+        # Extract place of birth
+        place_match = re.search(r'PLACE\s*OF\s*BIRTH\s*[:.]\s*([A-Z0-9\s,/-]+?)(?=\s+(?:DATE|MOTHER|FATHER|ADDRESS))', self.extracted_text)
         if place_match:
-            self.matches['PlaceOfBirth'] = place_match.group(1).strip()
-            
-        self.confidence_score = self.calculate_confidence(len(required_patterns))
-        return self._generate_response("Birth Certificate")
+            info['place_of_birth'] = place_match.group(1).strip()
+
+        # Extract parents' names
+        father_match = re.search(r"FATHER['S]*\s*NAME\s*[:.]\s*([A-Z\s]+?)(?=\s+(?:MOTHER|ADDRESS|DATE))", self.extracted_text)
+        if father_match:
+            info['father_name'] = father_match.group(1).strip()
+
+        mother_match = re.search(r"MOTHER['S]*\s*NAME\s*[:.]\s*([A-Z\s]+?)(?=\s+(?:FATHER|ADDRESS|DATE))", self.extracted_text)
+        if mother_match:
+            info['mother_name'] = mother_match.group(1).strip()
+
+        # Extract address
+        address_match = re.search(r'(?:PRESENT\s*)?ADDRESS\s*[:.]\s*([A-Z0-9\s,/-]+?)(?=\s+(?:DATE|PERMANENT|NOTE|ENSURE))', self.extracted_text)
+        if address_match:
+            info['address'] = address_match.group(1).strip()
+
+        return info
 
 class MarriageCertificateValidator(BaseDocumentValidator):
     def validate(self, text: str) -> Dict[str, Any]:

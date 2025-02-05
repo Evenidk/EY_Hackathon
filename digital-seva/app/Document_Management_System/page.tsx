@@ -1,5 +1,7 @@
 // digital-seva\app\Document_Management_System\page.tsx
-"use client";
+'use client';
+
+import { Suspense } from 'react';
 import { DocumentVerification } from "../components/DocumentVerification";
 import Navbar from "../components/Navbar";
 import { useRouter } from "next/navigation";
@@ -10,8 +12,6 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <Navbar />
-
-      {/* Back Button */}
       <div className="container mx-auto px-4 mt-4">
         <button
           onClick={() => router.push("/")}
@@ -34,7 +34,9 @@ export default function Home() {
         </button>
       </div>
       <div className="p-4">
-      <DocumentVerification />
+        <Suspense fallback={<div>Loading...</div>}>
+          <DocumentVerification />
+        </Suspense>
       </div>
     </div>
   );

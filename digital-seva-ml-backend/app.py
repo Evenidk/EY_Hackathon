@@ -6,12 +6,13 @@ import logging
 from werkzeug.utils import secure_filename
 import pytesseract
 import pdf2image
+import tempfile
 from pathlib import Path
+from document_validators import DOCUMENT_VALIDATORS
 import cv2
 import numpy as np
 import re
-from typing import Dict, Any, List
-from document_validators import DOCUMENT_VALIDATORS
+from typing import Dict, Any
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -30,152 +31,70 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 Path(UPLOAD_FOLDER).mkdir(parents=True, exist_ok=True)
 
 # Configure Tesseract path
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # Windows
 
-def allowed_file(filename: str) -> bool:
+def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def enhance_image(image: np.ndarray) -> List[np.ndarray]:
-    """Enhanced image preprocessing pipeline"""
-    enhanced_images = []
-    
-    # Convert to grayscale if needed
-    if len(image.shape) == 3:
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    else:
-        gray = image.copy()
-    
-    # 1. Basic preprocessing with contrast enhancement
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-    enhanced_gray = clahe.apply(gray)
-    enhanced_images.append(enhanced_gray)
-    
-    # 2. Multiple thresholding techniques
-    # Adaptive Gaussian
-    adaptive_gaussian = cv2.adaptiveThreshold(
-        enhanced_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
-        cv2.THRESH_BINARY, 11, 2
-    )
-    enhanced_images.append(adaptive_gaussian)
-    
-    # Adaptive Mean
-    adaptive_mean = cv2.adaptiveThreshold(
-        enhanced_gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, 
-        cv2.THRESH_BINARY, 11, 2
-    )
-    enhanced_images.append(adaptive_mean)
-    
-    # Otsu's thresholding
-    _, otsu = cv2.threshold(enhanced_gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    enhanced_images.append(otsu)
-    
-    # 3. Noise reduction
-    denoised = cv2.fastNlMeansDenoising(enhanced_gray)
-    enhanced_images.append(denoised)
-    
-    # 4. Sharpening
-    kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
-    sharpened = cv2.filter2D(enhanced_gray, -1, kernel)
-    enhanced_images.append(sharpened)
-    
-    # 5. Dilation and erosion
-    kernel = np.ones((2,2), np.uint8)
-    dilated = cv2.dilate(enhanced_gray, kernel, iterations=1)
-    enhanced_images.append(dilated)
-    
-    return enhanced_images
-
-def extract_text_from_image(image: np.ndarray) -> str:
-    """Extract text using multiple OCR approaches"""
-    enhanced_images = enhance_image(image)
-    extracted_texts = []
-    
-    # Expanded OCR configs
-    configs = [
-        '--oem 3 --psm 6 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',  # Restricted charset
-        '--oem 3 --psm 3',  # Full page
-        '--oem 3 --psm 4',  # Single column
-        '--oem 3 --psm 1',  # Auto with OSD
-        '--oem 3 --psm 11'  # Single text line
-    ]
-    
-    for img in enhanced_images:
-        for config in configs:
-            try:
-                # Try both with and without language specification
-                text1 = pytesseract.image_to_string(img, lang='eng+hin', config=config)
-                text2 = pytesseract.image_to_string(img, lang='eng', config=config)
-                
-                if text1.strip():
-                    extracted_texts.append(text1)
-                if text2.strip():
-                    extracted_texts.append(text2)
-            except Exception as e:
-                logger.warning(f"OCR failed for config {config}: {str(e)}")
-                continue
-    
-    # Combine and clean text
-    combined_text = ' '.join(extracted_texts)
-    # Enhanced text cleaning
-    cleaned_text = re.sub(r'\s+', ' ', combined_text)  # normalize spaces
-    cleaned_text = re.sub(r'[^\w\s]', ' ', cleaned_text)  # remove special characters
-    cleaned_text = ' '.join(cleaned_text.split())  # remove extra spaces
-    return cleaned_text.strip()
-
 def process_pdf(file) -> str:
-    """Enhanced PDF processing pipeline"""
+    """Process PDF file and extract text"""
     try:
+        # Save file temporarily
         filename = secure_filename(file.filename)
         temp_path = os.path.join(app.config['UPLOAD_FOLDER'], f"temp_{filename}")
         file.save(temp_path)
 
         try:
-            # Convert PDF to images with higher DPI and quality
-            images = pdf2image.convert_from_path(
-                temp_path,
-                dpi=400,  # Increased DPI
-                grayscale=False,
-                thread_count=2,  # Parallel processing
-                use_cropbox=True,
-                strict=False
-            )
-            
-            all_text = []
+            # Convert PDF to images
+            images = pdf2image.convert_from_path(temp_path)
+            extracted_text = ""
             
             for img in images:
                 # Convert PIL Image to OpenCV format
                 opencv_img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
                 
-                # Enhanced resize logic
+                # Image preprocessing pipeline
+                # 1. Resize if too small
                 height, width = opencv_img.shape[:2]
-                target_height = 2000  # Increased target height
-                if height < target_height:
-                    scale = target_height/height
-                    opencv_img = cv2.resize(
-                        opencv_img, 
-                        None, 
-                        fx=scale, 
-                        fy=scale, 
-                        interpolation=cv2.INTER_CUBIC
-                    )
+                if height < 1000:
+                    scale = 1000/height
+                    opencv_img = cv2.resize(opencv_img, None, fx=scale, fy=scale)
                 
-                # Extract text with enhanced processing
-                text = extract_text_from_image(opencv_img)
-                if text:
-                    all_text.append(text)
+                # 2. Convert to grayscale
+                gray = cv2.cvtColor(opencv_img, cv2.COLOR_BGR2GRAY)
+                
+                # 3. Apply adaptive thresholding
+                binary = cv2.adaptiveThreshold(
+                    gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+                    cv2.THRESH_BINARY, 11, 2
+                )
+                
+                # 4. Denoise
+                denoised = cv2.fastNlMeansDenoising(binary)
+                
+                # 5. Apply different preprocessing techniques and combine results
+                text1 = pytesseract.image_to_string(denoised, lang='eng+hin')
+                text2 = pytesseract.image_to_string(gray, lang='eng+hin')
+                
+                # Combine texts (this helps catch text that might be missed by one method)
+                extracted_text += text1 + "\n" + text2 + "\n"
             
-            final_text = ' '.join(all_text)
-            logger.debug(f"Extracted text: {final_text}")
-            return final_text
+            # Clean up extracted text
+            extracted_text = re.sub(r'\s+', ' ', extracted_text)  # Remove extra whitespace
+            extracted_text = extracted_text.strip()
             
+            logger.debug(f"Extracted text: {extracted_text}")
+            return extracted_text
+        
         finally:
+            # Clean up temporary file
             if os.path.exists(temp_path):
                 os.remove(temp_path)
     
     except Exception as e:
         logger.error(f"Error processing PDF: {str(e)}", exc_info=True)
         raise
-
+    
 @app.route('/verify', methods=['POST'])
 def verify_document():
     try:
@@ -188,9 +107,13 @@ def verify_document():
         
         logger.info(f"Processing document type: {doc_type}")
         
-        if not doc_type or not file or file.filename == '':
-            logger.error("Missing required fields")
-            return jsonify({"error": "Missing required fields"}), 400
+        if not doc_type:
+            logger.error("Document type not specified")
+            return jsonify({"error": "Document type not specified"}), 400
+        
+        if file.filename == '':
+            logger.error("No selected file")
+            return jsonify({"error": "No selected file"}), 400
         
         if not allowed_file(file.filename):
             logger.error(f"Invalid file type: {file.filename}")
@@ -205,20 +128,11 @@ def verify_document():
                 "details": {"errors": ["Unsupported document type"]}
             }), 400
         
-        # Extract text with enhanced processing
+        # Process the PDF and extract text
         logger.info(f"Extracting text from file: {file.filename}")
         extracted_text = process_pdf(file)
         
-        if not extracted_text:
-            logger.warning("No text extracted from document")
-            return jsonify({
-                "error": "No text could be extracted from document",
-                "isValid": False,
-                "confidence": 0,
-                "details": {"errors": ["Text extraction failed"]}
-            }), 400
-        
-        # Validate document
+        # Validate using appropriate validator
         logger.info("Validating document...")
         validator = DOCUMENT_VALIDATORS[doc_type]
         result = validator.validate(extracted_text)
@@ -234,6 +148,6 @@ def verify_document():
             "confidence": 0,
             "details": {"errors": [str(e)]}
         }), 500
-
+        
 if __name__ == '__main__':
     app.run(debug=True)

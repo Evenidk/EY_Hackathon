@@ -36,8 +36,6 @@ const DOCUMENT_TYPES = [
   'Driving License',
   'Income Certificate',
   'Disability Certificate',
-  'BPL Certificate',
-  'Domicile Certificate',
   'Birth Certificate',
   'Marriage Certificate',
   'Bank Passbook',
