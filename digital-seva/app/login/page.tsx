@@ -4,6 +4,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -37,38 +41,41 @@ const Login = () => {
   };
 
   return (
-    <div className="container mx-auto max-w-md mt-8">
-      <h2 className="text-2xl font-semibold">Login</h2>
-      {error && <div className="text-red-500">{error}</div>}
-      <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          className="w-full p-2 border rounded-md"
-          required
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          className="w-full p-2 border rounded-md"
-          required
-        />
-        <button
-          type="submit"
-          className="w-full p-2 bg-blue-600 text-white rounded-md"
-        >
-          Login
-        </button>
-      </form>
-      <div className="mt-4 text-center">
-        <Link href="/register" className="text-blue-600">
-          Don't have an account? Register
-        </Link>
-      </div>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-center text-2xl">Login</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              required
+            />
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              required
+            />
+            <Button type="submit" className="w-full">
+              Login
+            </Button>
+          </form>
+          <div className="mt-4 text-center text-sm">
+            Don't have an account? <Link href="/register" className="text-blue-600">Register</Link>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

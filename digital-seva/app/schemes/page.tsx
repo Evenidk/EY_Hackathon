@@ -70,8 +70,9 @@ const SchemesPage = () => {
 
   const filteredSchemes = schemes.filter((scheme) => {
     const matchesSearch = 
-      scheme.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      scheme.description.toLowerCase().includes(searchQuery.toLowerCase());
+    scheme.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (scheme.description?.toLowerCase()?.includes(searchQuery.toLowerCase()) ?? false);
+  
     
     const matchesCategory = 
       selectedCategory === "All" || 
