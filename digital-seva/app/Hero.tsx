@@ -15,11 +15,8 @@ import {
   Bot,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useTranslation } from "./lib/TranslationContext";
 import Navbar from "./components/Navbar";
-import { ProfileCompletionPopup } from "./components/ProfileCompletionPopup";
-import { useProfileCompletion } from "./hooks/useProfileCompletion";
 import { AIAssistant } from "./components/AIAssistant";
 import { useUser } from "./hooks/useUser";
 import HeroComponent from "./main";

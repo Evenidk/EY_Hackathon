@@ -1,4 +1,5 @@
 // digital-seva\app\faq.tsx
+
 "use client"
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
@@ -26,7 +27,7 @@ const faqData: FAQItem[] = [
     answer: "The AI assistant, Nithya, helps you by providing personalized recommendations based on your profile. You can ask Nithya about scheme eligibility, required documents, application processes, and benefits. Nithya can also guide you through the application steps and provide updates on your application status."
   },
   { 
-    question: " How does the AI Scheme Recommender work?", 
+    question: "How does the AI Scheme Recommender work?", 
     answer: "The AI Scheme Recommender analyzes your profile details, such as age, income, occupation, location, and other relevant factors. It then matches your profile with the eligibility criteria of various government schemes to provide you with a list of schemes you are eligible for. This personalized recommendation helps you easily find and apply for the schemes that best suit your needs."
   }
 ];
@@ -34,24 +35,28 @@ const faqData: FAQItem[] = [
 const FAQSection = () => {
   return (
     <section className="w-full max-w-4xl mx-auto py-16 px-6">
+      {/* Section Title */}
       <div className="text-center space-y-4 mb-12">
-        <h2 className="text-4xl font-bold tracking-tight">Frequently Asked Questions</h2>
-        <p className="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-          Find answers to common questions about our platform- Digital Seva.
+        <h2 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
+          Frequently Asked Questions
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-lg">
+          Find answers to common questions about our platform - Digital Seva.
         </p>
       </div>
       
+      {/* FAQ Accordion */}
       <Accordion type="single" collapsible className="w-full space-y-4">
         {faqData.map((item, index) => (
           <AccordionItem 
             key={index} 
             value={`item-${index}`}
-            className="border rounded-lg px-4 shadow-sm hover:shadow-md transition-shadow"
+            className="border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition-all"
           >
-            <AccordionTrigger className="text-left text-base font-medium py-4">
+            <AccordionTrigger className="text-left text-lg font-medium py-4 px-6 text-gray-900 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
               {item.question}
             </AccordionTrigger>
-            <AccordionContent className="text-gray-600 dark:text-gray-300 pb-4 leading-relaxed">
+            <AccordionContent className="text-gray-700 dark:text-gray-300 px-6 pb-4 leading-relaxed">
               {item.answer}
             </AccordionContent>
           </AccordionItem>
