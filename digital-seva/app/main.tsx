@@ -7,18 +7,21 @@ import "swiper/css/pagination";
 
 const heroSlides = [
   {
-    title: "A special credit card made for Developers.",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vehicula massa in enim luctus.",
+    title: "Get Tailored Government Scheme Recommendations",
+    description:
+      "Our AI-driven platform analyzes your profile to provide personalized recommendations for government schemes that you are eligible for.",
     img: "https://d33wubrfki0l68.cloudfront.net/d6f1462500f7670e0db6b76b35054a081679a5a0/0ce15/images/hero/5.1/illustration.png",
   },
   {
-    title: "Secure & Fast Transactions.",
-    description: "Experience seamless payments with advanced security and instant processing.",
+    title: "Instant Document Verification with AI",
+    description:
+      "Upload your documents and let our AI-powered system verify them instantly, ensuring you have all the necessary paperwork for your applications.",
     img: "https://d33wubrfki0l68.cloudfront.net/d6f1462500f7670e0db6b76b35054a081679a5a0/0ce15/images/hero/5.1/illustration.png",
   },
   {
-    title: "Global Accessibility for Developers.",
-    description: "Our platform supports multiple currencies and provides worldwide accessibility.",
+    title: "24/7 Assistance with Nithya",
+    description:
+      "Get round-the-clock support from Nithya, our AI assistant, to help you navigate through government schemes and application processes effortlessly.",
     img: "https://d33wubrfki0l68.cloudfront.net/d6f1462500f7670e0db6b76b35054a081679a5a0/0ce15/images/hero/5.1/illustration.png",
   },
 ];
@@ -26,13 +29,16 @@ const heroSlides = [
 const HeroComponent: React.FC = () => {
   return (
     <div className="bg-white mx-auto relative">
-      <section className="pt-12 sm:pb-16 lg:pt-8 relative">
+      <section className="pt-2 pb-2 sm:pb-12 lg:pt-0 relative">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8 relative">
           <Swiper
             modules={[Navigation, Pagination, Autoplay]}
             spaceBetween={30}
             slidesPerView={1}
-            navigation={{ nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" }}
+            navigation={{
+              nextEl: ".swiper-button-next",
+              prevEl: ".swiper-button-prev",
+            }}
             pagination={{ clickable: true }}
             autoplay={{ delay: 3000 }}
             className="w-full relative"
@@ -50,7 +56,11 @@ const HeroComponent: React.FC = () => {
                   </div>
 
                   <div>
-                    <img className="w-full rounded-lg shadow-lg" src={slide.img} alt="Illustration" />
+                    <img
+                      className="w-full rounded-lg shadow-lg"
+                      src={slide.img}
+                      alt="Illustration"
+                    />
                   </div>
                 </div>
               </SwiperSlide>
@@ -65,6 +75,5 @@ const HeroComponent: React.FC = () => {
     </div>
   );
 };
-
 
 export default HeroComponent;

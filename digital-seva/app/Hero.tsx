@@ -137,15 +137,18 @@ const CitizenServices = () => {
 
       <main className="mx-auto max-w-8xl px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
-        <div className="mb-12 text-center">
+        {/* <div className="mb-12 text-center">
           <h1 className="text-5xl font-bold mb-6 text-[#1F2937]">
             {t("headerTitle")}
           </h1>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
             {t("accessMessage")}
           </p>
-        </div>
-        <HeroComponent />
+        </div> */}
+<div className="mb-8 -mt-8 text-center">
+  <HeroComponent />
+</div>
+
 
         {/* Quick Links Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
