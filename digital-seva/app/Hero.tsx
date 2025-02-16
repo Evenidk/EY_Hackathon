@@ -22,6 +22,9 @@ import { ProfileCompletionPopup } from "./components/ProfileCompletionPopup";
 import { useProfileCompletion } from "./hooks/useProfileCompletion";
 import { AIAssistant } from "./components/AIAssistant";
 import { useUser } from "./hooks/useUser";
+import HeroComponent from "./main";
+import FAQSection from "./faq";
+import Footer from "./footer";
 
 // Define interfaces for type safety
 interface Notification {
@@ -132,7 +135,7 @@ const CitizenServices = () => {
     <div className="min-h-screen bg-white text-gray-800">
       <Navbar />
 
-      <main className="mx-auto p-8 ">
+      <main className="mx-auto max-w-8xl px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
         <div className="mb-12 text-center">
           <h1 className="text-5xl font-bold mb-6 text-[#1F2937]">
@@ -142,6 +145,7 @@ const CitizenServices = () => {
             {t("accessMessage")}
           </p>
         </div>
+        <HeroComponent />
 
         {/* Quick Links Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
@@ -176,68 +180,9 @@ const CitizenServices = () => {
           <AIAssistant user={user || {}} />
         )}
 
-        {/* Recent Updates Section */}
-        <Link href="/schemes">
-          <Card className="border border-gray-200">
-            <CardHeader>
-              <CardTitle className="text-[#1F2937]">
-                {t("recentUpdates")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                  <div className="bg-blue-100 p-3 rounded-full">
-                    <Bell className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800">
-                      {t("newSchemeAnnounced")}
-                    </h4>
-                    <p className="text-gray-600">{t("newSchemeDesc")}</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
+        <FAQSection />
+        <Footer />
       </main>
-
-      {/* Notification Button */}
-      <button
-        className="fixed bottom-4 right-4 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
-        onClick={() => setShowNotifications(!showNotifications)}
-      >
-        <Bell className="w-6 h-6" />
-        {notifications.length > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">
-            {notifications.length}
-          </span>
-        )}
-      </button>
-
-      {/* Notifications Panel */}
-      {showNotifications && (
-        <div className="fixed right-4 bottom-16 bg-white rounded-lg shadow-xl w-80 p-4 border border-gray-200">
-          <h3 className="font-bold mb-4 text-[#1F2937]">
-            {t("notifications.title")}
-          </h3>
-          {notifications.length > 0 ? (
-            notifications.map((notif) => (
-              <div key={notif.id} className="p-2 border-b border-gray-200">
-                <p className="text-sm text-gray-700">{notif.message}</p>
-                {notif.isNew && (
-                  <span className="text-xs text-blue-500">
-                    {t("notifications.new")}
-                  </span>
-                )}
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-600 text-sm">{t("notifications.empty")}</p>
-          )}
-        </div>
-      )}
     </div>
   );
 };

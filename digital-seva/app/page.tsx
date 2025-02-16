@@ -9,9 +9,6 @@ export default function Home() {
   return (
     <div>
       <CitizenServices />
-      <Dashboard />
-      <GovtServicesPlatform />
-      <SchemeFinder /> 
     </div>
   );
 }

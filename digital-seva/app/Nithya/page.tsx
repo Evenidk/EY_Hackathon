@@ -1,3 +1,4 @@
+// digital-seva\app\Nithya\page.tsx
 "use client";
 
 import { Nithya } from "../components/Nithya";
