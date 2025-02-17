@@ -13,6 +13,7 @@ Millions of citizens struggle to find and apply for government schemes due to **
 
 ## 💡 Solution
 Digital Seva integrates AI and automation to provide:  
+
 🔹 **AI-Powered Scheme Recommender** – Matches users with suitable government schemes based on **age, income, occupation, location, and category (minority, disability, etc.)**  
 🔹 **Nithya – AI Chat Assistant** – Provides **multilingual 24/7 support** for scheme queries, eligibility checks, and application tracking  
 🔹 **Smart Document Verification** – Uses **ML models** to validate identity and eligibility documents instantly  
