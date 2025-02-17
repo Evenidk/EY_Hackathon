@@ -5,6 +5,7 @@ Digital Seva is an AI-powered platform designed to **simplify access to governme
 
 ## 🎯 Problem Statement
 Millions of citizens struggle to find and apply for government schemes due to **complex eligibility criteria, lack of awareness, and documentation issues**. Our platform tackles these challenges by offering:
+
 ✅ **Personalized AI-driven scheme recommendations**  
 ✅ **Instant document verification**  
 ✅ **24/7 chatbot assistance (Nithya)**  
