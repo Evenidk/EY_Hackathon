@@ -12,6 +12,7 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
+import { useTranslation } from "@/app/lib/TranslationContext";
 
 interface VerificationResult {
   isValid: boolean;
@@ -58,6 +59,7 @@ export function DocumentVerification() {
     }))
   );
   const [authToken, setAuthToken] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     setIsMounted(true);
@@ -131,7 +133,7 @@ export function DocumentVerification() {
       });
 
       if (!verifyResponse.ok) {
-        throw new Error('Verification failed');
+        throw new Error(t("VerificationFailed"));
       }
 
       const verificationResult = await verifyResponse.json();
@@ -195,8 +197,8 @@ export function DocumentVerification() {
 
         if (!transformedResult.isValid) {
           toast({
-            title: "Verification Failed",
-            description: transformedResult.errors?.[0] || "Document verification failed",
+            title: t("VerificationFailed"),
+            description: transformedResult.errors?.[0] || t("Documentverificationfailed"),
             variant: "destructive"
           });
         }
@@ -270,17 +272,17 @@ export function DocumentVerification() {
   
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6">Document Verification</h1>
+      <h1 className="text-2xl font-bold mb-6">{t("DocumentVerification")}</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {documents.map((doc) => (
           <Card key={doc.type}>
             <CardHeader>
-              <CardTitle>{doc.type}</CardTitle>
+              <CardTitle>{t(doc.type)}</CardTitle>
               <CardDescription>
-                {doc.status === 'pending' && 'Upload document for verification'}
-                {doc.status === 'verifying' && 'Verifying...'}
-                {doc.status === 'verified' && 'Document verified'}
-                {doc.status === 'failed' && 'Verification failed'}
+                {doc.status === 'pending' && t("DocumentVerificationdesc")}
+                {doc.status === 'verifying' && t("Verifying")}
+                {doc.status === 'verified' && t("VerificationSuccessful")}
+                {doc.status === 'failed' && t("VerificationFailed")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -312,7 +314,7 @@ export function DocumentVerification() {
                     disabled={doc.status === 'verifying'}
                     variant={doc.status === 'verified' ? 'outline' : 'default'}
                   >
-                    {doc.file ? 'Replace Document' : 'Upload Document'}
+                    {doc.file ? t("replacedocument") : t("uploaddocument")}
                   </Button>
 
                   {doc.isStored && (
@@ -320,7 +322,7 @@ export function DocumentVerification() {
                       variant="destructive"
                       onClick={() => doc._id && handleDeleteDocument(doc._id, doc.type)}
                     >
-                      Delete
+                      {t("delete")}
                     </Button>
                   )}
                 </div>
@@ -331,16 +333,16 @@ export function DocumentVerification() {
                       value={doc.uploadProgress || 45} 
                       className="w-full"
                     />
-                    <p className="text-sm text-gray-500">Processing document...</p>
+                    <p className="text-sm text-gray-500">{t("Processingdocument")}</p>
                   </div>
                 )}
 
                 {doc.result && (
                   <div className="text-sm space-y-2">
                     <p className={`font-medium ${doc.result.isValid ? 'text-green-600' : 'text-red-600'}`}>
-                      {doc.result.isValid ? 'Verification Successful' : 'Verification Failed'}
+                      {doc.result.isValid ? t("VerificationSuccessful") : t("VerificationFailed")}
                     </p>
-                    <p>Confidence: {Math.round(doc.result.confidenceScore * 100)}%</p>
+                    <p>{t("Confidence")}: {Math.round(doc.result.confidenceScore * 100)}%</p>
                     
                     {doc.result.errors && doc.result.errors.length > 0 && (
                       <div className="bg-red-50 p-2 rounded">

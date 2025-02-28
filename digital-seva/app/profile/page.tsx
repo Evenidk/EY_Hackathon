@@ -4,7 +4,7 @@
 import { useState, useEffect, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "../components/Navbar";
-
+import { useTranslation } from "@/app/lib/TranslationContext";
 interface User {
   _id: string;
   name: string;
@@ -43,7 +43,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const router = useRouter();
-
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     maritalStatus: "",
     address: "",
@@ -238,7 +238,7 @@ export default function ProfilePage() {
             d="M10 19l-7-7m0 0l7-7m-7 7h18"
           />
         </svg>
-        Back to Home
+        {t("backtohome")}
       </button>
     </div>
 
@@ -254,7 +254,7 @@ export default function ProfilePage() {
               </div>
               <div className="text-white">
                 <h1 className="text-3xl font-bold">{user.name}</h1>
-                <p className="text-blue-100">Email: {user.email}</p>
+                <p className="text-blue-100">{t("email")}: {user.email}</p>
               </div>
             </div>
           </div>
@@ -262,15 +262,15 @@ export default function ProfilePage() {
           {/* Basic Info Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6">
             <div className="bg-gray-50 rounded-lg p-4">
-              <label className="text-sm text-gray-500">Phone Number</label>
+              <label className="text-sm text-gray-500">{t("phoneNumber")}</label>
               <p className="text-lg font-medium">{user.phoneNumber}</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-4">
-              <label className="text-sm text-gray-500">Age</label>
+              <label className="text-sm text-gray-500">{t("age")}</label>
               <p className="text-lg font-medium">{user.age} years</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-4">
-              <label className="text-sm text-gray-500">Gender</label>
+              <label className="text-sm text-gray-500">{t("gender")}</label>
               <p className="text-lg font-medium">{user.sex}</p>
             </div>
           </div>
@@ -293,13 +293,13 @@ export default function ProfilePage() {
                   d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                 />
               </svg>
-              Personal Information
+              {t("Personalinfo")}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Marital Status
+                  {t("MaritalStatus")}
                 </label>
                 <select
                   name="maritalStatus"
@@ -307,11 +307,11 @@ export default function ProfilePage() {
                   onChange={handleChange}
                   className="mt-1 block w-full p-2.5 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Select Status</option>
-                  <option value="Single">Single</option>
-                  <option value="Married">Married</option>
-                  <option value="Divorced">Divorced</option>
-                  <option value="Widowed">Widowed</option>
+                  <option value="">{t("SelectStatus")}</option>
+                  <option value="Single">{t("single")}</option>
+                  <option value="Married">{t("married")}</option>
+                  <option value="Divorced">{t("divorced")}</option>
+                  <option value="Widowed">{t("widowed")}</option>
                 </select>
               </div>
 
@@ -341,7 +341,7 @@ export default function ProfilePage() {
             {/* Residence Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Residence Type
+                {t("residencetype")}
               </label>
               <select
                 name="residenceType"
@@ -349,16 +349,16 @@ export default function ProfilePage() {
                 onChange={handleChange}
                 className="mt-1 block w-full p-2.5 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Select Type</option>
-                <option value="Urban">Urban</option>
-                <option value="Rural">Rural</option>
+                <option value="">{t("selecttype")}</option>
+                <option value="Urban">{t("urban")}</option>
+                <option value="Rural">{t("rural")}</option>
               </select>
             </div>
 
             {/* Category */}
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Category
+                {t("category")}
               </label>
               <select
                 name="category"
@@ -366,14 +366,14 @@ export default function ProfilePage() {
                 onChange={handleChange}
                 className="mt-1 block w-full p-2.5 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Select Category</option>
-                <option value="General">General</option>
-                <option value="OBC">Other Backward Class (OBC)</option>
+                <option value="">{t("selectcategory")}</option>
+                <option value="General">{t("general")}</option>
+                <option value="OBC">{t("OtherBackwardClass")}</option>
                 <option value="PVTG">
-                  Particularly Vulnerable Tribal Group (PVTG)
+                  {t("ScheduledCaste")}
                 </option>
-                <option value="SC">Scheduled Caste (SC)</option>
-                <option value="ST">Scheduled Tribe (ST)</option>
+                <option value="SC">{t("ScheduledCaste")}</option>
+                <option value="ST">{t("ScheduledTribe")}</option>
               </select>
             </div>
 
@@ -388,7 +388,7 @@ export default function ProfilePage() {
                   className="rounded border-gray-300"
                 />
                 <span className="text-sm font-medium text-gray-700">
-                  Differently Abled
+                  {t("DifferentlyAbled")}
                 </span>
               </label>
 
@@ -422,7 +422,7 @@ export default function ProfilePage() {
                   className="rounded border-gray-300"
                 />
                 <span className="text-sm font-medium text-gray-700">
-                  Minority
+                  {t("Minority")}
                 </span>
               </label>
             </div>
@@ -443,7 +443,7 @@ export default function ProfilePage() {
                   className="rounded border-gray-300"
                 />
                 <span className="text-sm font-medium text-gray-700">
-                  Student
+                  {t("Student")}
                 </span>
               </label>
             </div>
@@ -452,7 +452,7 @@ export default function ProfilePage() {
             {!formData.isStudent && (
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Employment Status
+                  {t("employmentStatus")}
                 </label>
                 <select
                   name="employmentStatus"
@@ -460,11 +460,11 @@ export default function ProfilePage() {
                   onChange={handleChange}
                   className="mt-1 block w-full p-2.5 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Select Status</option>
-                  <option value="Employed">Employed</option>
-                  <option value="Unemployed">Unemployed</option>
+                  <option value="">{t("SelectStatus")}</option>
+                  <option value="Employed">{t("Employed")}</option>
+                  <option value="Unemployed">{t("Unemployed")}</option>
                   <option value="Self-Employed/ Entrepreneur">
-                    Self-Employed/ Entrepreneur
+                    {t("SelfEmployedEntrepreneur")}
                   </option>
                 </select>
               </div>
@@ -487,7 +487,7 @@ export default function ProfilePage() {
                     className="rounded border-gray-300"
                   />
                   <span className="text-sm font-medium text-gray-700">
-                    Government Employee
+                   {t("GovernmentEmployee")}
                   </span>
                 </label>
               </div>
@@ -497,7 +497,7 @@ export default function ProfilePage() {
               onClick={handleUpdate}
               className="mt-6 w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-colors"
             >
-              Update Profile
+              {t("updateprofile")}
             </button>
           </div>
 
@@ -507,15 +507,15 @@ export default function ProfilePage() {
 
             <div className="space-y-4">
               {[
-                "Aadhar Card",
-                "PAN Card",
-                "Caste Certificate",
-                "Ration Card",
-                "Voter ID",
-                "Driving License",
-                'Income Certificate',
-                'Birth Certificate',
-                'Marriage Certificate',
+                t("aadhar"),
+                t("pancard"),
+                t("castecertificate"),
+                t("rationcard"),
+                t("votercard"),
+                t("drivinglicense"),
+                t("incomecertificate"),
+                t("birthcertificate"),
+                t("marraigecertificate"),
               ].map((docType) => {
                 const existingDoc = documents.find(
                   (doc) => doc.documentType === docType
@@ -537,7 +537,7 @@ export default function ProfilePage() {
                               : "bg-yellow-100 text-yellow-800"
                           }`}
                         >
-                          {existingDoc.isVerified ? "Verified" : "Pending"}
+                          {existingDoc.isVerified ? t("verified") : t("pending")}
                         </span>
                       )}
                     </div>
@@ -556,7 +556,7 @@ export default function ProfilePage() {
                           rel="noopener noreferrer"
                           className="ml-4 text-blue-600 hover:text-blue-700"
                         >
-                          View
+                          {t("view")}
                         </a>
                       )}
                     </div>

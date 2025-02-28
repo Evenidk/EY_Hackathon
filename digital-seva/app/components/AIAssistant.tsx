@@ -4,6 +4,7 @@ import { UserProfile } from '../types';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader, Bot } from 'lucide-react';
 import { useUserSchemeData } from '../hooks/useUserSchemeData';
+import { useTranslation } from "@/app/lib/TranslationContext";
 
 interface AIAssistantProps {
   user: UserProfile;
@@ -14,6 +15,7 @@ export function AIAssistant({ user }: AIAssistantProps) {
   const [recommendations, setRecommendations] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
+  const { t } = useTranslation();
 
   const generateSchemeRecommendations = async () => {
     if (!userData) return;
@@ -90,7 +92,7 @@ export function AIAssistant({ user }: AIAssistantProps) {
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bot className="h-6 w-6" />
-            <span>AI Scheme Assistant</span>
+            <span>{t("aiAssistant")}</span>
           </div>
           <button
             onClick={generateSchemeRecommendations}
@@ -104,10 +106,10 @@ export function AIAssistant({ user }: AIAssistantProps) {
             {isLoading ? (
               <div className="flex items-center">
                 <Loader className="animate-spin mr-2" size={16} />
-                Analyzing...
+                {t("analyzing")}
               </div>
             ) : (
-              'Get Recommendations'
+              t("getrecommendations")
             )}
           </button>
         </CardTitle>
@@ -117,17 +119,17 @@ export function AIAssistant({ user }: AIAssistantProps) {
         {/* Profile Summary */}
         {userData && (
           <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-medium mb-2">Profile Summary</h3>
+            <h3 className="font-medium mb-2">{t("profilesummary")}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
-                <p>Name: {userData.name || 'Not specified'}</p>
-                <p>Age: {userData.age || 'Not specified'}</p>
-                <p>Location: {userData.location || 'Not specified'}</p>
+                <p>{t("Name")}: {userData.name || 'Not specified'}</p>
+                <p>{t("age")}: {userData.age || 'Not specified'}</p>
+                <p>{t("location")}: {userData.location || 'Not specified'}</p>
               </div>
               <div>
-                <p>Category: {userData.category || 'General'}</p>
-                <p>Income: ₹{userData.annualIncome?.toLocaleString() || 'Not specified'}</p>
-                <p>Employment: {userData.employmentStatus || 'Not specified'}</p>
+                <p>{t("category")}: {userData.category || 'General'}</p>
+                <p>{t("income")}: ₹{userData.annualIncome?.toLocaleString() || 'Not specified'}</p>
+                <p>{t("Employment")}: {userData.employmentStatus || 'Not specified'}</p>
               </div>
             </div>
           </div>
@@ -155,7 +157,7 @@ export function AIAssistant({ user }: AIAssistantProps) {
         {/* Initial State */}
         {!recommendations && !error && !isLoading && (
           <div className="text-center py-8 text-gray-500">
-            Click "Get Recommendations" to receive personalized scheme suggestions
+            {t("aiAssistantDesc")}
           </div>
         )}
       </CardContent>

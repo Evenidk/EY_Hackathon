@@ -4,9 +4,11 @@
 import { Nithya } from "../components/Nithya";
 import Navbar from "../components/Navbar";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "@/app/lib/TranslationContext";
 
 export default function NithyaPage() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen">
@@ -30,7 +32,7 @@ export default function NithyaPage() {
           >
             <path d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          <span className="text-lg font-medium">Back to Home</span>
+          <span className="text-lg font-medium">{t("backtohome")}</span>
         </button>
       </div>
 

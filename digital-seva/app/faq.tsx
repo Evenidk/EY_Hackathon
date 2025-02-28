@@ -1,47 +1,48 @@
-// digital-seva\app\faq.tsx
-
 "use client"
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useTranslation } from "@/app/lib/TranslationContext";
 
 interface FAQItem {
-  question: string
-  answer: string
+  question: string;
+  answer: string;
 }
 
-const faqData: FAQItem[] = [
-  { 
-    question: "How do I register for an account on the platform?", 
-    answer: "To register for an account, click on the 'Register' button on the homepage. Fill in your personal details such as name, email, phone number, age, and gender. Once you submit the form, you will receive a confirmation email. Follow the instructions in the email to complete your registration."
-  },
-  { 
-    question: "How can I upload and verify my documents?", 
-    answer: "After logging in, navigate to the 'Document Management System' section. Click on 'Upload Documents' and select the type of document you want to upload. Follow the instructions to scan or upload the document. The system will automatically verify the document using our AI-powered verification process."
-  },
-  { 
-    question: "What types of government schemes can I find on this platform?", 
-    answer: "Our platform provides information on a wide range of government schemes, including those related to agriculture, healthcare, housing, education, employment, insurance, and welfare. You can use the 'Scheme Finder' to search and filter schemes based on your eligibility and preferences."
-  },
-  { 
-    question: "How does the AI assistant help me with government schemes?", 
-    answer: "The AI assistant, Nithya, helps you by providing personalized recommendations based on your profile. You can ask Nithya about scheme eligibility, required documents, application processes, and benefits. Nithya can also guide you through the application steps and provide updates on your application status."
-  },
-  { 
-    question: "How does the AI Scheme Recommender work?", 
-    answer: "The AI Scheme Recommender analyzes your profile details, such as age, income, occupation, location, and other relevant factors. It then matches your profile with the eligibility criteria of various government schemes to provide you with a list of schemes you are eligible for. This personalized recommendation helps you easily find and apply for the schemes that best suit your needs."
-  }
-];
-
 const FAQSection = () => {
+  const { t } = useTranslation(); // ✅ Moved inside the component
+
+  const faqData: FAQItem[] = [
+    { 
+      question: t("faq1"), 
+      answer: t("faq1Desc")
+    },
+    { 
+      question: t("faq2"), 
+      answer: t("faq2Desc")
+    },
+    { 
+      question: t("faq3"), 
+      answer: t("faq3Desc")
+    },
+    { 
+      question: t("faq4"), 
+      answer: t("faq4Desc")
+    },
+    { 
+      question: t("faq5"), 
+      answer: t("faq5Desc")
+    }
+  ];
+
   return (
     <section className="w-full max-w-4xl mx-auto py-16 px-6">
       {/* Section Title */}
       <div className="text-center space-y-4 mb-12">
         <h2 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
-          Frequently Asked Questions
+          {t("faq")}
         </h2>
         <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-lg">
-          Find answers to common questions about our platform - Digital Seva.
+          {t("faqDesc")}
         </p>
       </div>
       
@@ -63,7 +64,7 @@ const FAQSection = () => {
         ))}
       </Accordion>
     </section>
-  )
-}
+  );
+};
 
-export default FAQSection
+export default FAQSection;

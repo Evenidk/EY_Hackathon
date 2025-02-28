@@ -40,6 +40,16 @@ const DocumentSchema = new mongoose.Schema({
     isVerified: {
         type: Boolean,
         default: false
+    },
+    verificationDetails: {
+        confidenceScore: {
+            type: Number,
+            default: 0
+        },
+        errors: {
+            type: [String],
+            default: []
+        }
     }
 });
 

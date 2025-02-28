@@ -43,16 +43,23 @@ router.post('/upload', auth, upload.single('document'), async (req, res) => {
             return res.status(400).json({ msg: 'No file uploaded' });
         }
 
-        const { documentType } = req.body;
+        const { documentType, verificationResult } = req.body;
         if (!documentType) {
             return res.status(400).json({ msg: 'Document type is required' });
         }
+
+        const parsedVerificationResult = JSON.parse(verificationResult);
 
         // Create new document record
         const document = new Document({
             userId: req.user.id,
             documentType,
-            filePath: req.file.path
+            filePath: req.file.path,
+            isVerified: parsedVerificationResult.isValid,
+            verificationDetails: {
+                confidenceScore: parsedVerificationResult.confidenceScore,
+                errors: parsedVerificationResult.errors
+            }
         });
 
         await document.save();

@@ -22,6 +22,7 @@ import { useUser } from "./hooks/useUser";
 import HeroComponent from "./main";
 import FAQSection from "./faq";
 import Footer from "./footer";
+import ResearchCharts from "./insights";
 
 // Define interfaces for type safety
 interface Notification {
@@ -63,15 +64,15 @@ const CitizenServices = () => {
       color: "bg-blue-500",
     },
     {
-      title: t("Document Management System"),
-      description: t("AI-driven document verification & management"),
+      title: t("documentmanagement"),
+      description: t("documentmanagementDesc"),
       icon: <FileText className="h-7 w-7" />,
       href: "/Document_Management_System",
       color: "bg-green-500",
     },
     {
-      title: t("Nithya"),
-      description: t("Your AI Government Scheme Assistant"),
+      title: t("nithya"),
+      description: t("nithyaDesc"),
       icon: <Bot className="h-7 w-7" />,
       href: "/Nithya",
       color: "bg-purple-500",
@@ -170,6 +171,7 @@ const CitizenServices = () => {
           <AIAssistant user={user || {}} />
         )}
 
+        <ResearchCharts />
         <FAQSection />
         <Footer />
       </main>

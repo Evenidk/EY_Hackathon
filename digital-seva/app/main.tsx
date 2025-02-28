@@ -4,29 +4,29 @@ import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-
-const heroSlides = [
-  {
-    title: "Get Tailored Government Scheme Recommendations",
-    description:
-      "Our AI-driven platform analyzes your profile to provide personalized recommendations for government schemes that you are eligible for.",
-    img: "aischeme.png",
-  },
-  {
-    title: "Instant Document Verification with AI",
-    description:
-      "Upload your documents and let our AI-powered system verify them instantly, ensuring you have all the necessary paperwork for your applications.",
-    img: "datamanagement.png",
-  },
-  {
-    title: "24/7 Assistance with Nithya",
-    description:
-      "Get round-the-clock support from Nithya, our AI assistant, to help you navigate through government schemes and application processes effortlessly.",
-    img: "nithya-avatar.png",
-  },
-];
+import { useTranslation } from "@/app/lib/TranslationContext";
 
 const HeroComponent: React.FC = () => {
+  const { t } = useTranslation();
+
+  const heroSlides = [
+    {
+      title: t("heroheader1"),
+      description: t("herodesc1"),
+      img: "aischeme.png",
+    },
+    {
+      title: t("heroheader2"),
+      description: t("herodesc2"),
+      img: "datamanagement.png",
+    },
+    {
+      title: t("heroheader3"),
+      description: t("herodesc3"),
+      img: "nithya-avatar.png",
+    },
+  ];
+
   return (
     <div className="bg-white w-full relative">
       <section className="pt-8 pb-12 relative">

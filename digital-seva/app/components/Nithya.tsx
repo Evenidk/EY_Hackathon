@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useUserSchemeData } from '../hooks/useUserSchemeData';
 import { Message, Language, StateLanguages } from '../types/index';
 import { stateLanguages } from '../config/languages';
-
+import { useTranslation } from "@/app/lib/TranslationContext";
 export function Nithya() {
   const { userData, loading, error: userDataError } = useUserSchemeData();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -13,7 +13,7 @@ export function Nithya() {
   const [error, setError] = useState<string | null>(null);
   const [userInput, setUserInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
+  const { t } = useTranslation();
   // Scroll to bottom of messages
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -129,10 +129,10 @@ export function Nithya() {
     <div className="flex flex-col h-screen bg-gray-100">
       {/* Header */}
       <div className="bg-blue-600 p-4 text-white">
-        <h1 className="text-xl font-bold">Nithya - AI Assistant</h1>
+        <h1 className="text-xl font-bold">{t("NithyaAIAssistant")}</h1>
         {selectedLanguage && (
           <div className="text-sm">
-            Language: {selectedLanguage.nativeName} ({selectedLanguage.name})
+            {t("Language")}: {selectedLanguage.nativeName} ({selectedLanguage.name})
           </div>
         )}
       </div>
@@ -177,7 +177,7 @@ export function Nithya() {
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-            placeholder={isProcessing ? 'Processing...' : 'Type your message...'}
+            placeholder={isProcessing ? t("processing") : t("typeyourmessage")}
             disabled={isProcessing}
             className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           />
@@ -190,7 +190,7 @@ export function Nithya() {
                 : 'hover:bg-primary-dark'
             }`}
           >
-            Send
+            {t("send")}
           </button>
         </div>
       </div>
