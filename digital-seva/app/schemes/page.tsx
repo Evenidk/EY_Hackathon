@@ -78,6 +78,9 @@ const SchemesPage = () => {
 
       recognition.onerror = (event: any) => {
         console.error("Speech recognition error:", event.error);
+        console.error("Error details:", event);
+        console.error("Is Listening:", isListening); // Log the current listening state
+        console.error("Network Status:", navigator.onLine ? "Online" : "Offline"); // Log network status
         setIsListening(false);
         alert(`Speech recognition error: ${event.error}`);
       };
