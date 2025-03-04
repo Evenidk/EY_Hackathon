@@ -1,6 +1,8 @@
+// digital-seva\app\schemes\page.tsx
+
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   FileText,
@@ -11,12 +13,14 @@ import {
   ArrowLeft,
   Mic,
   MicOff,
+  Bookmark,
 } from "lucide-react";
 import { useTranslation } from "@/app/lib/TranslationContext";
 import Navbar from "./../components/Navbar";
 import { schemes } from "./../data/schemes";
 import SchemeApplication from "./../components/SchemeApplication";
 import Link from "next/link";
+import { Bookmarks } from "../types/Bookmarks";
 
 interface Scheme {
   id: number;
@@ -40,6 +44,7 @@ const SchemesPage = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedScheme, setSelectedScheme] = useState<Scheme | null>(null);
   const [isListening, setIsListening] = useState(false);
+  const [bookmarkedSchemes, setBookmarkedSchemes] = useState<Bookmarks[]>([]);
 
   const categories = [
     "All",
@@ -78,9 +83,6 @@ const SchemesPage = () => {
 
       recognition.onerror = (event: any) => {
         console.error("Speech recognition error:", event.error);
-        console.error("Error details:", event);
-        console.error("Is Listening:", isListening); // Log the current listening state
-        console.error("Network Status:", navigator.onLine ? "Online" : "Offline"); // Log network status
         setIsListening(false);
         alert(`Speech recognition error: ${event.error}`);
       };
@@ -95,11 +97,112 @@ const SchemesPage = () => {
     }
   };
 
+  // Fetch bookmarks on component mount
+  useEffect(() => {
+    const fetchBookmarks = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("No token found, redirecting to login.");
+        return; // Optionally redirect to login
+      }
+
+      try {
+        const response = await fetch("http://localhost:3000/api/bookmarks", {
+          headers: {
+            "x-auth-token": token,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data: Bookmarks[] = await response.json(); // Type the response data
+        setBookmarkedSchemes(data); // Store the entire bookmark object
+      } catch (error) {
+        console.error("Error fetching bookmarks:", error);
+      }
+    };
+
+    fetchBookmarks();
+  }, []);
+
+  const handleBookmark = async (schemeId: number) => {
+    const token = localStorage.getItem("token");
+    console.log("Token:", token); // Log the token
+
+    if (!token) {
+        console.error("No token found, cannot add/remove bookmark.");
+        return; // Optionally redirect to login
+    }
+
+    // Check if the scheme is already bookmarked
+    const existingBookmark = bookmarkedSchemes.find(b => b.schemeId === schemeId);
+
+    // Optimistically update the UI
+    if (existingBookmark) {
+        // If already bookmarked, remove it
+        setBookmarkedSchemes((prev) => prev.filter((b) => b._id !== existingBookmark._id));
+
+        try {
+            const response = await fetch(`http://localhost:3000/api/bookmarks/${existingBookmark._id}`, {
+                method: "DELETE",
+                headers: {
+                    "x-auth-token": token,
+                },
+            });
+
+            if (!response.ok) {
+                const errorMessage = await response.text(); // Get error message from response
+                console.error(`Error removing bookmark: ${errorMessage}`); // Log the error message
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
+            }
+        } catch (error) {
+            console.error("Error removing bookmark:", error);
+            // If there's an error, revert the optimistic update
+            setBookmarkedSchemes((prev) => [...prev, existingBookmark]);
+        }
+    } else {
+        // If not bookmarked, add it
+        const newBookmark: Bookmarks = { 
+            _id: "", // Placeholder, will be replaced with the actual ID from the server
+            userId: "yourUserId", // Replace with actual user ID
+            schemeId, // This should be a number now
+            createdAt: new Date() 
+        };
+
+        setBookmarkedSchemes((prev) => [...prev, newBookmark]); // Optimistically add the bookmark
+
+        try {
+            const response = await fetch("http://localhost:3000/api/bookmarks", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-auth-token": token,
+                },
+                body: JSON.stringify({ schemeId }), // Send only the schemeId to the server
+            });
+
+            if (!response.ok) {
+                const errorMessage = await response.text(); // Get error message from response
+                console.error(`Error adding bookmark: ${errorMessage}`); // Log the error message
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
+            }
+
+            const addedBookmark = await response.json(); // Get the added bookmark from the response
+            setBookmarkedSchemes((prev) => prev.map(b => b.schemeId === schemeId ? addedBookmark : b)); // Update the bookmark with the returned data
+        } catch (error) {
+            console.error("Error adding bookmark:", error);
+            // If there's an error, revert the optimistic update
+            setBookmarkedSchemes((prev) => prev.filter((b) => b.schemeId !== schemeId));
+        }
+    }
+};
+
   const filteredSchemes = schemes.filter((scheme) => {
     const matchesSearch =
       scheme.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (scheme.description?.toLowerCase()?.includes(searchQuery.toLowerCase()) ??
-        false);
+      (scheme.description?.toLowerCase()?.includes(searchQuery.toLowerCase()) ?? false);
 
     const matchesCategory =
       selectedCategory === "All" || scheme.category === selectedCategory;
@@ -197,6 +300,21 @@ const SchemesPage = () => {
                     </CardTitle>
                     <p className="text-sm text-gray-500">{scheme.category}</p>
                   </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleBookmark(scheme.id);
+                    }}
+                    className="ml-auto"
+                  >
+                    <Bookmark
+                      className={`h-5 w-5 ${
+                        bookmarkedSchemes.some(b => b.schemeId === scheme.id)
+                          ? "text-yellow-500"
+                          : "text-gray-400"
+                      }`}
+                    />
+                  </button>
                 </div>
               </CardHeader>
               <CardContent className="p-6">

@@ -172,6 +172,7 @@ const CitizenServices = () => {
         )}
 
         <ResearchCharts />
+        
         <FAQSection />
         <Footer />
       </main>
