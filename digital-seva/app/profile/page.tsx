@@ -56,7 +56,7 @@ export default function ProfilePage() {
     annualIncome: "",
     location: "",
     familySize: "",
-    residenceType: "",
+    residencetype: "",
     category: "",
     isDifferentlyAbled: false,
     disabilityPercentage: "",
@@ -91,7 +91,7 @@ export default function ProfilePage() {
           annualIncome: data.annualIncome?.toString() || "",
           location: data.location || "",
           familySize: data.familySize?.toString() || "",
-          residenceType: data.residenceType || "",
+          residencetype: data.residenceType || "",
           category: data.category || "",
           isDifferentlyAbled: data.isDifferentlyAbled || false,
           disabilityPercentage: data.disabilityPercentage?.toString() || "",
@@ -275,7 +275,7 @@ export default function ProfilePage() {
         <div className="flex-1">
           {/* Profile Header */}
           <div className="bg-white shadow-sm overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-800 to-blue-600 px-6 py-8">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-6 py-8">
               <div className="flex items-center space-x-6">
                 <div className="bg-white rounded-full w-24 h-24 flex items-center justify-center shadow-lg">
                   <span className="text-4xl font-bold text-blue-600">
@@ -333,7 +333,7 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    {t("MaritalStatus")}
+                    {t("MartialStatus")}
                   </label>
                   <select
                     name="maritalStatus"
@@ -382,8 +382,8 @@ export default function ProfilePage() {
                   {t("residencetype")}
                 </label>
                 <select
-                  name="residenceType"
-                  value={formData.residenceType}
+                  name="residencetype"
+                  value={formData.residencetype}
                   onChange={handleChange}
                   className="mt-1 block w-full p-2.5 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"
                 >
@@ -540,7 +540,23 @@ export default function ProfilePage() {
 
           {activeSection === "documents" && (
             <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-              <h2 className="text-xl font-semibold mb-6">{t("Documents")}</h2>
+              <h2 className="text-xl font-semibold mb-6 flex items-center">
+                <svg
+                  className="w-5 h-5 mr-2 text-blue-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 3h10a2 2 0 012 2v16a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2zM7 3v6h10V3"
+                  />
+                </svg>
+
+                {t("Documents")}
+              </h2>
               <div className="space-y-4">
                 {[
                   t("aadhar"),
@@ -607,7 +623,23 @@ export default function ProfilePage() {
 
           {activeSection === "bookmarks" && (
             <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-              <h2 className="text-xl font-semibold mb-6">{t("Bookmarks")}</h2>
+              <h2 className="text-xl font-semibold mb-6 flex items-center">
+                <svg
+                  className="w-5 h-5 mr-2 text-blue-500"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 3a2 2 0 012-2h10a2 2 0 012 2v18l-7-4-7 4V3z"
+                  />
+                </svg>
+
+                {t("Bookmarks")}
+              </h2>
               <BookmarkPage />
             </div>
           )}
