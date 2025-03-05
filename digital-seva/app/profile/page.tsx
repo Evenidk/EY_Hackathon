@@ -301,11 +301,11 @@ export default function ProfilePage() {
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
                 <label className="text-sm text-gray-500">{t("age")}</label>
-                <p className="text-lg font-medium">{user.age} years</p>
+                <p className="text-lg font-medium">{user.age} {t("years")}</p>
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
                 <label className="text-sm text-gray-500">{t("gender")}</label>
-                <p className="text-lg font-medium">{user.sex}</p>
+                <p className="text-lg font-medium">{user.sex === "Male" ? t("male") : user.sex === "Female" ? t("female") : t("other")}</p>
               </div>
             </div>
           </div>
@@ -336,7 +336,7 @@ export default function ProfilePage() {
                     {t("MartialStatus")}
                   </label>
                   <select
-                    name="maritalStatus"
+                    name="marital Status"
                     value={formData.maritalStatus}
                     onChange={handleChange}
                     className="mt-1 block w-full p-2.5 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"
@@ -355,7 +355,7 @@ export default function ProfilePage() {
                   .map(([key, value]) => (
                     <div key={key}>
                       <label className="block text-sm font-medium text-gray-700">
-                        {key.replace(/([A-Z])/g, " $1").trim()}
+                      {t(key)}
                       </label>
                       <input
                         type={
@@ -366,8 +366,9 @@ export default function ProfilePage() {
                         name={key}
                         value={
                           value === true || value === false
-                            ? String(value)
-                            : value
+                            ? t(String(value))
+
+                            : t(value)
                         }
                         onChange={handleChange}
                         className="mt-1 block w-full p-2.5 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"
@@ -638,7 +639,7 @@ export default function ProfilePage() {
                   />
                 </svg>
 
-                {t("Bookmarks")}
+                {t("bookmarks")}
               </h2>
               <BookmarkPage />
             </div>

@@ -3,12 +3,14 @@
 import React, { useEffect, useState } from "react";
 import { Bookmark as BookmarkIcon } from "lucide-react"; 
 import { Bookmarks } from "../types/Bookmarks"; 
-import { schemes } from "../data/schemes"; // Import the schemes data
+import { schemes } from "../data/schemes";
+import { useTranslation } from "@/app/lib/TranslationContext"; 
 
 const BookmarkComponent: React.FC = () => {
     const [bookmarkedSchemes, setBookmarkedSchemes] = useState<Bookmarks[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const { t } = useTranslation();
 
     useEffect(() => {
         const fetchBookmarks = async () => {
@@ -29,7 +31,7 @@ const BookmarkComponent: React.FC = () => {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
-                const data: Bookmarks[] = await response.json(); // Type the response data
+                const data: Bookmarks[] = await response.json();
                 setBookmarkedSchemes(data);
             } catch (err) {
                 console.error("Error fetching bookmarks:", err);
@@ -46,7 +48,7 @@ const BookmarkComponent: React.FC = () => {
         const token = localStorage.getItem("token");
         if (!token) {
             console.error("No token found, cannot remove bookmark.");
-            return; // Optionally redirect to login
+            return;
         }
 
         try {
@@ -68,14 +70,14 @@ const BookmarkComponent: React.FC = () => {
         }
     };
 
-    if (loading) return <p>Loading bookmarks...</p>;
+    if (loading) return <p>{t('loadingbookmars')}</p>;
     if (error) return <p>{error}</p>;
 
     return (
         <div className="p-6 bg-white rounded-lg shadow-md">
             {/* <h2 className="text-2xl font-bold mb-4">My Bookmarks</h2> */}
             {bookmarkedSchemes.length === 0 ? (
-                <p>No bookmarks found.</p>
+                <p>{t('nobookmarksfound')}</p>
             ) : (
                 <ul>
                     {bookmarkedSchemes.map((bookmark) => {
@@ -88,14 +90,14 @@ const BookmarkComponent: React.FC = () => {
                                     {scheme ? (
                                         <span>{scheme.name} - {scheme.description}</span>
                                     ) : (
-                                        <span>Scheme not found</span>
+                                        <span>{t('schemenotfound')}</span>
                                     )}
                                 </div>
                                 <button
                                     onClick={() => handleRemoveBookmark(bookmark._id)}
                                     className="text-red-500 hover:text-red-700"
                                 >
-                                    Remove
+                                    {t('remove')}
                                 </button>
                             </li>
                         );
