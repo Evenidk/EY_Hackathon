@@ -6,18 +6,19 @@ import { Message, Language, StateLanguages } from "../types/index";
 import { stateLanguages } from "../config/languages";
 import { useTranslation } from "@/app/lib/TranslationContext";
 import { marked } from "marked";
+import { Mic, MicOff } from "lucide-react";
 
 export function Nithya() {
   const { userData, loading, error: userDataError } = useUserSchemeData();
   const [messages, setMessages] = useState<Message[]>([]);
-  const [selectedLanguage, setSelectedLanguage] = useState<Language | null>(
-    null
-  );
+  const [selectedLanguage, setSelectedLanguage] = useState<Language | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userInput, setUserInput] = useState("");
+  const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
+
   // Scroll to bottom of messages
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -129,6 +130,47 @@ export function Nithya() {
     }
   };
 
+  const startVoiceRecognition = () => {
+    if (
+      typeof window !== "undefined" &&
+      ("webkitSpeechRecognition" in window || "SpeechRecognition" in window)
+    ) {
+      const SpeechRecognition =
+        (window as any).webkitSpeechRecognition ||
+        (window as any).SpeechRecognition;
+      const recognition = new SpeechRecognition();
+
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = "en-US";
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setUserInput(transcript); 
+        handleSendMessage(); 
+        setIsListening(false);
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error("Speech recognition error:", event.error);
+        setIsListening(false);
+        alert(`Speech recognition error: ${event.error}`);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
+    } else {
+      alert("Speech recognition is not supported in your browser.");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -213,6 +255,14 @@ export function Nithya() {
             }`}
           >
             {t("send")}
+          </button>
+          {/* Voice Input Button */}
+          <button
+            onClick={startVoiceRecognition}
+            className={`p-3 rounded-full ${isListening ? "bg-red-500" : "bg-blue-500"} text-white hover:opacity-90 transition-opacity shadow-md`}
+            title={isListening ? "Listening..." : "Start voice input"}
+          >
+            {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
           </button>
         </div>
       </div>
