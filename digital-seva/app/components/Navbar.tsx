@@ -30,6 +30,27 @@ const Navbar = () => {
     setIsLanguageDropdownOpen(false);
   };
 
+  const languages = [
+    { code: "english", name: "English" },
+    { code: "hindi", name: "हिंदी" },
+    { code: "bengali", name: "বাংলা" },
+    { code: "marathi", name: "मराठी" },
+    { code: "tamil", name: "தமிழ்" },
+    { code: "telugu", name: "తెలుగు" },
+    { code: "gujarati", name: "ગુજરાતી" },
+    { code: "malayalam", name: "മലയാളം" },
+    { code: "kannada", name: "ಕನ್ನಡ" },
+    { code: "odia", name: "ଓଡ଼ିଆ" },
+    { code: "punjabi", name: "ਪੰਜਾਬੀ" },
+    { code: "urdu", name: "اردو" },
+    { code: "assamese", name: "অসমীয়া" },
+    { code: "bhojpuri", name: "भोजपुरी" },
+    { code: "rajasthani", name: "राजस्थानी" },
+    { code: "haryanvi", name: "हरियाणवी" },
+    { code: "konkani", name: "कोंकणी" },
+    { code: "dogri", name: "डोगरी" },
+  ];
+
   return (
     <nav className="bg-white shadow-md p-4 w-full">
       <div className="container mx-auto flex justify-between items-center">
@@ -61,43 +82,16 @@ const Navbar = () => {
               <span>{t("language")}</span>
             </button>
             {isLanguageDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-md shadow-lg z-10">
-                <button
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                  onClick={() => handleLanguageChange("english")}
-                >
-                  English
-                </button>
-                <button
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                  onClick={() => handleLanguageChange("hindi")}
-                >
-                  हिंदी
-                </button>
-                <button
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                  onClick={() => handleLanguageChange("bengali")}
-                >
-                  বাংলা
-                </button>
-                <button
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                  onClick={() => handleLanguageChange("marathi")}
-                >
-                  मराठी
-                </button>
-                <button
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                  onClick={() => handleLanguageChange("tamil")}
-                >
-                  தமிழ்
-                </button>
-                <button
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                  onClick={() => handleLanguageChange("telugu")}
-                >
-                  తెలుగు
-                </button>
+              <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-300 rounded-md shadow-lg z-10 grid grid-cols-3 gap-2 p-2">
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    className="block w-full text-left px-2 py-1 text-gray-700 hover:bg-gray-100"
+                    onClick={() => handleLanguageChange(lang.code)}
+                  >
+                    {lang.name}
+                  </button>
+                ))}
               </div>
             )}
           </div>
@@ -140,43 +134,18 @@ const Navbar = () => {
               <span>{t("language")}</span>
             </button>
             {isLanguageDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-md shadow-lg z-10">
-                <button
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                  onClick={() => handleLanguageChange("english")}
-                >
-                  English
-                </button>
-                <button
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                  onClick={() => handleLanguageChange("hindi")}
-                >
-                  हिंदी
-                </button>
-                <button
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                  onClick={() => handleLanguageChange("bengali")}
-                >
-                  বাংলা
-                </button>
-                <button
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                  onClick={() => handleLanguageChange("marathi")}
-                >
-                  मराठी
-                </button>
-                <button
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                  onClick={() => handleLanguageChange("tamil")}
-                >
-                  தமிழ்
-                </button>
-                <button
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                  onClick={() => handleLanguageChange("telugu")}
-                >
-                  తెలుగు
-                </button>
+              <div className="absolute right-0 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg z-10">
+                <div className="grid grid-cols-1 gap-2 p-2">
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      onClick={() => handleLanguageChange(lang.code)}
+                    >
+                      {lang.name}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>

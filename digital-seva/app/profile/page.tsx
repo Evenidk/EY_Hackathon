@@ -236,7 +236,7 @@ export default function ProfilePage() {
       <div className="container  flex">
         {/* Sidebar Navigation */}
         <div className="w-1/6 bg-white shadow-md p-4">
-          <h2 className="text-lg font-bold mb-4">Navigation</h2>
+          <h2 className="text-lg font-bold mb-4">{t('Navigation')}</h2>
           <ul>
             <li>
               <button
@@ -245,7 +245,7 @@ export default function ProfilePage() {
                   activeSection === "personalInfo" ? "bg-gray-200" : ""
                 }`}
               >
-                Personal Info
+                {t('personalinfo')}
               </button>
             </li>
             <li>
@@ -255,7 +255,7 @@ export default function ProfilePage() {
                   activeSection === "documents" ? "bg-gray-200" : ""
                 }`}
               >
-                Documents
+                {t('Documents')}
               </button>
             </li>
             <li>
@@ -265,7 +265,7 @@ export default function ProfilePage() {
                   activeSection === "bookmarks" ? "bg-gray-200" : ""
                 }`}
               >
-                Bookmarks
+                {t('bookmarks')}
               </button>
             </li>
           </ul>
