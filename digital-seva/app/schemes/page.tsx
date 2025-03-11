@@ -132,77 +132,93 @@ const SchemesPage = () => {
     console.log("Token:", token); // Log the token
 
     if (!token) {
-        console.error("No token found, cannot add/remove bookmark.");
-        return; // Optionally redirect to login
+      console.error("No token found, cannot add/remove bookmark.");
+      return; // Optionally redirect to login
     }
 
     // Check if the scheme is already bookmarked
-    const existingBookmark = bookmarkedSchemes.find(b => b.schemeId === schemeId);
+    const existingBookmark = bookmarkedSchemes.find(
+      (b) => b.schemeId === schemeId
+    );
 
     // Optimistically update the UI
     if (existingBookmark) {
-        // If already bookmarked, remove it
-        setBookmarkedSchemes((prev) => prev.filter((b) => b._id !== existingBookmark._id));
+      // If already bookmarked, remove it
+      setBookmarkedSchemes((prev) =>
+        prev.filter((b) => b._id !== existingBookmark._id)
+      );
 
-        try {
-            const response = await fetch(`http://localhost:3000/api/bookmarks/${existingBookmark._id}`, {
-                method: "DELETE",
-                headers: {
-                    "x-auth-token": token,
-                },
-            });
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/bookmarks/${existingBookmark._id}`,
+          {
+            method: "DELETE",
+            headers: {
+              "x-auth-token": token,
+            },
+          }
+        );
 
-            if (!response.ok) {
-                const errorMessage = await response.text(); // Get error message from response
-                console.error(`Error removing bookmark: ${errorMessage}`); // Log the error message
-                throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
-            }
-        } catch (error) {
-            console.error("Error removing bookmark:", error);
-            // If there's an error, revert the optimistic update
-            setBookmarkedSchemes((prev) => [...prev, existingBookmark]);
+        if (!response.ok) {
+          const errorMessage = await response.text(); // Get error message from response
+          console.error(`Error removing bookmark: ${errorMessage}`); // Log the error message
+          throw new Error(
+            `HTTP error! status: ${response.status}, message: ${errorMessage}`
+          );
         }
+      } catch (error) {
+        console.error("Error removing bookmark:", error);
+        // If there's an error, revert the optimistic update
+        setBookmarkedSchemes((prev) => [...prev, existingBookmark]);
+      }
     } else {
-        // If not bookmarked, add it
-        const newBookmark: Bookmarks = { 
-            _id: "", // Placeholder, will be replaced with the actual ID from the server
-            userId: "yourUserId", // Replace with actual user ID
-            schemeId, // This should be a number now
-            createdAt: new Date() 
-        };
+      // If not bookmarked, add it
+      const newBookmark: Bookmarks = {
+        _id: "", // Placeholder, will be replaced with the actual ID from the server
+        userId: "yourUserId", // Replace with actual user ID
+        schemeId, // This should be a number now
+        createdAt: new Date(),
+      };
 
-        setBookmarkedSchemes((prev) => [...prev, newBookmark]); // Optimistically add the bookmark
+      setBookmarkedSchemes((prev) => [...prev, newBookmark]); // Optimistically add the bookmark
 
-        try {
-            const response = await fetch("http://localhost:3000/api/bookmarks", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-auth-token": token,
-                },
-                body: JSON.stringify({ schemeId }), // Send only the schemeId to the server
-            });
+      try {
+        const response = await fetch("http://localhost:3000/api/bookmarks", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-auth-token": token,
+          },
+          body: JSON.stringify({ schemeId }), // Send only the schemeId to the server
+        });
 
-            if (!response.ok) {
-                const errorMessage = await response.text(); // Get error message from response
-                console.error(`Error adding bookmark: ${errorMessage}`); // Log the error message
-                throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
-            }
-
-            const addedBookmark = await response.json(); // Get the added bookmark from the response
-            setBookmarkedSchemes((prev) => prev.map(b => b.schemeId === schemeId ? addedBookmark : b)); // Update the bookmark with the returned data
-        } catch (error) {
-            console.error("Error adding bookmark:", error);
-            // If there's an error, revert the optimistic update
-            setBookmarkedSchemes((prev) => prev.filter((b) => b.schemeId !== schemeId));
+        if (!response.ok) {
+          const errorMessage = await response.text(); // Get error message from response
+          console.error(`Error adding bookmark: ${errorMessage}`); // Log the error message
+          throw new Error(
+            `HTTP error! status: ${response.status}, message: ${errorMessage}`
+          );
         }
+
+        const addedBookmark = await response.json(); // Get the added bookmark from the response
+        setBookmarkedSchemes((prev) =>
+          prev.map((b) => (b.schemeId === schemeId ? addedBookmark : b))
+        ); // Update the bookmark with the returned data
+      } catch (error) {
+        console.error("Error adding bookmark:", error);
+        // If there's an error, revert the optimistic update
+        setBookmarkedSchemes((prev) =>
+          prev.filter((b) => b.schemeId !== schemeId)
+        );
+      }
     }
-};
+  };
 
   const filteredSchemes = schemes.filter((scheme) => {
     const matchesSearch =
       scheme.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (scheme.description?.toLowerCase()?.includes(searchQuery.toLowerCase()) ?? false);
+      (scheme.description?.toLowerCase()?.includes(searchQuery.toLowerCase()) ??
+        false);
 
     const matchesCategory =
       selectedCategory === "All" || scheme.category === selectedCategory;
@@ -309,7 +325,7 @@ const SchemesPage = () => {
                   >
                     <Bookmark
                       className={`h-5 w-5 ${
-                        bookmarkedSchemes.some(b => b.schemeId === scheme.id)
+                        bookmarkedSchemes.some((b) => b.schemeId === scheme.id)
                           ? "text-yellow-500"
                           : "text-gray-400"
                       }`}
@@ -349,18 +365,40 @@ const SchemesPage = () => {
                 </div>
 
                 <div className="flex gap-4 mt-6">
-                  <button className="bg-blue-600 text-white w-full py-2 rounded-lg font-semibold text-sm hover:bg-blue-700 transition duration-200">
-                    {t("checkeligibility")}
-                  </button>
-                  <a
-                    href={scheme.applicationUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-green-600 text-white w-full py-2 rounded-lg font-semibold text-sm hover:bg-green-700 transition duration-200 text-center"
-                  >
-                    {t("applynow")}
-                  </a>
-                </div>
+  <button className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold text-sm hover:bg-blue-700 transition duration-200">
+    {t("checkeligibility")}
+  </button>
+  <a
+    href={scheme.applicationUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="flex-1 bg-green-600 text-white py-2 rounded-lg font-semibold text-sm hover:bg-green-700 transition duration-200 text-center"
+  >
+    {t("applynow")}
+  </a>
+  <a
+    href={scheme.pdfUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="w-12 h-10 bg-yellow-600 text-white rounded-lg flex justify-center items-center hover:bg-yellow-700 transition duration-200"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-6 h-6"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
+  </a>
+</div>
+
               </CardContent>
             </Card>
           ))}

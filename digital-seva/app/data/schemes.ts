@@ -15,6 +15,7 @@ export const schemes = [
     color: "blue",
     description: "Direct income support to enable farmers to take care of expenses related to agriculture and allied activities",
     applicationUrl: "https://pmkisan.gov.in/",
+    pdfUrl: "https://drive.google.com/file/d/1FkXf1puWal9IujDMyBhgzU2hT0hGDyby/view?usp=sharing",
   },
   {
     id: 2,
@@ -30,6 +31,7 @@ export const schemes = [
     color: "green",
     description: "Comprehensive healthcare coverage including hospitalization and treatment costs",
     applicationUrl: "https://www.pmjay.gov.in/",
+    pdfUrl: "https://drive.google.com/file/d/1JXmIkySG-CCUiurFlN7RdVum3m5C_C9U/view?usp=sharing",
   },
   {
     id: 3,
@@ -47,6 +49,8 @@ export const schemes = [
     color: "orange",
     description: "Housing scheme aimed at providing 'Housing for All' by 2024",
     applicationUrl: "https://pmaymis.gov.in/",
+    pdfUrl: "https://drive.google.com/file/d/1_RVf1xlDMS-CDBZyf9w2F_iVLPHTZkDR/view?usp=sharing",
+
   },
   {
     id: 4,
@@ -62,6 +66,8 @@ export const schemes = [
     color: "pink",
     description: "Long-term savings scheme to secure financial future of girl children",
     applicationUrl: "https://www.india.gov.in/sukanya-samriddhi-yojana",
+    pdfUrl: "https://drive.google.com/file/d/1dWZogLPpHdsNTmhR9IUKrlKBs7Tqk7gJ/view?usp=sharing",
+
   },
   {
     id: 5,
@@ -77,6 +83,8 @@ export const schemes = [
     color: "green",
     description: "Pension scheme ensuring social security of farmers in their old age",
     applicationUrl: "https://maandhan.in/",
+    pdfUrl: "https://drive.google.com/file/d/1ae1cc_g4iI0QeQ-BRhlWWZ67ys9RND7Y/view?usp=sharing",
+
   },
   {
     id: 6,
@@ -92,6 +100,8 @@ export const schemes = [
     color: "blue",
     description: "Financial support for meritorious students from economically weaker sections",
     applicationUrl: "https://scholarships.gov.in/",
+    pdfUrl: "https://drive.google.com/file/d/1tBJURrfIZGIz-ngeVwiZox4B82n_JlLx/view?usp=sharing",
+
   },
   {
     id: 7,
@@ -107,6 +117,8 @@ export const schemes = [
     color: "red",
     description: "Providing clean cooking fuel to rural households",
     applicationUrl: "https://www.pmuy.gov.in/",
+    pdfUrl: "https://drive.google.com/file/d/1UqUAehJZoc4DK9LKDaol9L-kWA_It4V0/view?usp=sharing",
+
   },
   {
     id: 8,
@@ -122,6 +134,8 @@ export const schemes = [
     color: "purple",
     description: "Skill development program for enhancing employability",
     applicationUrl: "https://www.skillindiadigital.gov.in/",
+    pdfUrl: "https://drive.google.com/file/d/1FDm_-bkMuu-qLSvTspMi_WRg6X9WkREs/view?usp=sharing",
+
   },
   {
     id: 9,
@@ -137,6 +151,8 @@ export const schemes = [
     color: "yellow",
     description: "Affordable life insurance for the masses",
     applicationUrl: "https://www.jansuraksha.gov.in/",
+    pdfUrl: "https://drive.google.com/file/d/1hM95W244TH5YI7AqCrMfjjMU09rTXKdM/view?usp=sharing",
+
   },
   {
     id: 10,
@@ -152,6 +168,8 @@ export const schemes = [
     color: "brown",
     description: "Legal guarantee for wage employment in rural areas",
     applicationUrl: "https://nrega.nic.in/",
+    pdfUrl: "https://drive.google.com/file/d/1cLkj1M_2KmL2m36F8RvOxaypAk_bPi-W/view?usp=sharing",
+
   },
   {
     id: 11,
@@ -167,6 +185,8 @@ export const schemes = [
     color: "cyan",
     description: "Empowering citizens with digital services and online infrastructure accessibility",
     applicationUrl: "https://www.digitalindia.gov.in/",
+    pdfUrl: "https://drive.google.com/file/d/10butoPe8RWzSfietN3YqX1CS4QC5A2z7/view?usp=sharing",
+
   },
   {
     id: 12,
@@ -182,6 +202,8 @@ export const schemes = [
     color: "purple",
     description: "Encouraging innovation and growth by providing a strong startup ecosystem in India",
     applicationUrl: "https://www.startupindia.gov.in/",
+    pdfUrl: "https://drive.google.com/file/d/1DhLfGPPbhdt0IL293oRiU-GAtJn201L_/view?usp=sharing",
+
   },
   {
     id: 13,
@@ -197,6 +219,8 @@ export const schemes = [
     color: "blue",
     description: "Ensuring old-age income security for unorganized sector workers with a voluntary pension scheme",
     applicationUrl: "https://www.npscra.nsdl.co.in/",
+    pdfUrl: "https://drive.google.com/file/d/1gBFDgu28esJVJTFt3lFnNgI69Eqt6H5-/view?usp=sharing",
+
   },
   {
     id: 14,
@@ -212,6 +236,8 @@ export const schemes = [
     color: "green",
     description: "A rural development program where MPs adopt villages to transform them into model villages through participatory governance and infrastructural development.",
     applicationUrl: "https://saanjhi.gov.in/",
+    pdfUrl: "https://drive.google.com/file/d/1h1l5od9knq8k7v2ZizWo1OZU7XUA0wJp/view?usp=sharing",
+
   },
   {
     id: 15,
@@ -235,6 +261,7 @@ export const schemes = [
     color: "green",
     description: "A mission to boost bamboo cultivation, processing, and product development, reducing dependency on imports and creating sustainable livelihoods.",
     applicationUrl: "https://nbm.nic.in/",
+    pdfUrl: "https://drive.google.com/file/d/1U3Zgdt2t9-am68t45QtCh0lZZqy_lSXW/view?usp=sharing",
   },
   {
     id: 16,
@@ -252,6 +279,8 @@ export const schemes = [
     color: "green",
     description: "Providing timely credit support to farmers for their cultivation and other needs.",
     applicationUrl: "https://pmkisan.gov.in/",
+    pdfUrl: "https://drive.google.com/file/d/16-y6_41TH1kJwgsG8zovXzTxaPupXJWY/view?usp=sharing",
+
   },
   {
     id: 17,
@@ -267,6 +296,8 @@ export const schemes = [
     color: "blue",
     description: "A scheme to bring about Blue Revolution through sustainable and responsible development of the fisheries sector.",
     applicationUrl: "https://pmmsy.dof.gov.in/",
+    pdfUrl: "https://drive.google.com/file/d/1CQNm5PCdb1NG3CKbEmxYjE0jfVIK0AJE/view?usp=sharing",
+
   },
   {
     id: 18,
@@ -282,6 +313,8 @@ export const schemes = [
     color: "brown",
     description: "Ensuring the health of livestock through various disease control programs.",
     applicationUrl: "https://dahd.nic.in/",
+    pdfUrl: "https://drive.google.com/file/d/1RBsE9mZswPdNsUVQ_rBNRwUmRrkQUJkh/view?usp=sharing",
+
   },
   {
     id: 19,
@@ -297,6 +330,8 @@ export const schemes = [
     color: "blue",
     description: "Providing financial support to students for higher education and research.",
     applicationUrl: "https://www.iari.res.in/",
+    pdfUrl: "https://drive.google.com/file/d/1ZcRhZhDRvfNgxi6zJaelwENxZNZcOqfs/view?usp=sharing",
+
   },
   {
     id: 20,
@@ -312,6 +347,8 @@ export const schemes = [
     color: "brown",
     description: "Supporting coffee growers through subsidies and development programs.",
     applicationUrl: "https://www.indiacoffee.org/",
+    pdfUrl: "https://drive.google.com/file/d/1LKWz4DiBezXcHkLtjiCBS2fgjIAHQltj/view?usp=sharing",
+
   },
   {
     id: 21,
@@ -327,5 +364,7 @@ export const schemes = [
     color: "purple",
     description: "Providing financial support to researchers for post-doctoral studies.",
     applicationUrl: "https://www.icmr.nic.in/",
+    pdfUrl: "https://drive.google.com/file/d/18YXv2OsM3rR1WqQg4t2QkEnutCF5AQuE/view?usp=sharing",
+
   }
 ];
