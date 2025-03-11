@@ -235,7 +235,7 @@ export function Nithya() {
 
       {/* Input */}
       <div className="border-t p-4 bg-white">
-        <div className="flex space-x-2">
+        <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
           <input
             type="text"
             value={userInput}
