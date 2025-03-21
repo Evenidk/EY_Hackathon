@@ -34,7 +34,7 @@ export const translations = {
     male: "Male",
     female: "Female",
     other: "Other",
-    income: "Monthly Income",
+    income: "Annual Income",
     location: "Location",
     category: "Category",
     aiAssistantDesc:

@@ -22,7 +22,7 @@ import { useUser } from "./hooks/useUser";
 import HeroComponent from "./main";
 import FAQSection from "./faq";
 import Footer from "./footer";
-import ResearchCharts from "./insights";
+import AboutUs from './about/AboutUs'; 
 
 // Define interfaces for type safety
 interface Notification {
@@ -171,7 +171,8 @@ const CitizenServices = () => {
           <AIAssistant user={user || {}} />
         )}
 
-        <ResearchCharts />
+        {/* <ResearchCharts /> */}
+        <AboutUs />
         
         <FAQSection />
         <Footer />

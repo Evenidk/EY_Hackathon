@@ -365,40 +365,39 @@ const SchemesPage = () => {
                 </div>
 
                 <div className="flex gap-4 mt-6">
-  <button className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold text-sm hover:bg-blue-700 transition duration-200">
-    {t("checkeligibility")}
-  </button>
-  <a
-    href={scheme.applicationUrl}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="flex-1 bg-green-600 text-white py-2 rounded-lg font-semibold text-sm hover:bg-green-700 transition duration-200 text-center"
-  >
-    {t("applynow")}
-  </a>
-  <a
-    href={scheme.pdfUrl}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="w-12 h-10 bg-yellow-600 text-white rounded-lg flex justify-center items-center hover:bg-yellow-700 transition duration-200"
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-6 h-6"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <polyline points="7 10 12 15 17 10" />
-      <line x1="12" y1="15" x2="12" y2="3" />
-    </svg>
-  </a>
-</div>
-
+                  <button className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold text-sm hover:bg-blue-700 transition duration-200">
+                    {t("checkeligibility")}
+                  </button>
+                  <a
+                    href={scheme.applicationUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 bg-green-600 text-white py-2 rounded-lg font-semibold text-sm hover:bg-green-700 transition duration-200 text-center"
+                  >
+                    {t("applynow")}
+                  </a>
+                  <a
+                    href={scheme.pdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-12 h-10 bg-yellow-600 text-white rounded-lg flex justify-center items-center hover:bg-yellow-700 transition duration-200"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-6 h-6"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                  </a>
+                </div>
               </CardContent>
             </Card>
           ))}

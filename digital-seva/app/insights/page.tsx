@@ -21,11 +21,14 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { useTranslation } from "@/app/lib/TranslationContext";
+import Navbar from '../components/Navbar';
+import { useRouter } from "next/navigation";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#FF8042"];
 
 const ResearchCharts = () => {
   const { t } = useTranslation();
+  const router = useRouter();
 
   const dataBarriers = [
     { name: t("documentVerificationIssues"), value: 65 },
@@ -90,7 +93,26 @@ const ResearchCharts = () => {
   ];
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container min-h-screen bg-gray-50">
+      <Navbar />
+      <button
+        onClick={() => router.push("/")}
+        className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition duration-300 p-4 mb-4"
+        aria-label="Back to Home"
+      >
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          viewBox="0 0 24 24"
+        >
+          <path d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        <span className="text-lg font-medium">{t("backtohome")}</span>
+      </button>
       <h2 className="text-3xl font-bold mb-4 text-Black-600">{t("graphtitle")}</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
